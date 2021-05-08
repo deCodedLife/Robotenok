@@ -1,19 +1,26 @@
 import 'dart:async';
+import 'package:flutter/cupertino.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
+import 'Payments.dart';
+import 'Students.dart';
+import 'Visits.dart';
+
 class DBStorage {
 
-  final String createStudents = "CREATE TABLE IF NOT EXISTS students (id	INTEGER NOT NULL UNIQUE,name	TEXT NOT NULL,phone	TEXT NOT NULL,parents	TEXT NOT NULL,sex	INTEGER NOT NULL,PRIMARY KEY(id AUTOINCREMENT));";
-  final String createPayments = "CREATE TABLE IF NOT EXISTS payments (id	INTEGER NOT NULL UNIQUE, date	TEXT NOT NULL, time	TEXT NOT NULL, student_id	INTEGER NOT NULL, credit	INTEGER NOT NULL, type	TEXT NOT NULL, FOREIGN KEY(student_id) REFERENCES students(id),PRIMARY KEY(id AUTOINCREMENT));";
-  final String createCosts = "CREATE TABLE IF NOT EXISTS costs (id	INTEGER NOT NULL UNIQUE, product	TEXT NOT NULL, cost	INTEGER NOT NULL, date	TEXT NOT NULL, time	TEXT NOT NULL, PRIMARY KEY(id AUTOINCREMENT));";
-  final String createVisits = "CREATE TABLE IF NOT EXISTS visits (id	INTEGER NOT NULL UNIQUE, student_id	INTEGER NOT NULL, date	TEXT NOT NULL, time	TEXT NOT NULL, type	TEXT NOT NULL, FOREIGN KEY(student_id) REFERENCES students(id),PRIMARY KEY(id AUTOINCREMENT));";
-  final String createGroupTypes = "CREATE TABLE IF NOT EXISTS group_types (id	INTEGER NOT NULL UNIQUE, name	TEXT NOT NULL,PRIMARY KEY(id AUTOINCREMENT));";
-  final String createGroups = "CREATE TABLE IF NOT EXISTS groups (id	INTEGER NOT NULL UNIQUE, name	TEXT NOT NULL,time	TEXT NOT NULL,duration	TEXT NOT NULL,weekday	INTEGER NOT NULL,group_type	INTEGER NOT NULL,PRIMARY KEY(id AUTOINCREMENT),FOREIGN KEY(group_type) REFERENCES group_types(id));";
-  final String createGroupsStudents = "CREATE TABLE IF NOT EXISTS groups_students (id	INTEGER NOT NULL UNIQUE, group_id	INTEGER NOT NULL, student_id	INTEGER NOT NULL, PRIMARY KEY(id AUTOINCREMENT),FOREIGN KEY(group_id) REFERENCES groups(id),FOREIGN KEY(student_id) REFERENCES students(id));";
-  final String createCourses = "CREATE TABLE IF NOT EXISTS courses (id	INTEGER NOT NULL UNIQUE, name	TEXT NOT NULL, payment	INTEGER NOT NULL, lessons	INTEGER NOT NULL, PRIMARY KEY(id AUTOINCREMENT));";
-  final String createCoursesStudents = "CREATE TABLE IF NOT EXISTS courses_students (id	INTEGER NOT NULL UNIQUE, course_id	INTEGER NOT NULL, student_id	INTEGER NOT NULL, FOREIGN KEY(student_id) REFERENCES students(id),FOREIGN KEY(course_id) REFERENCES courses(id),PRIMARY KEY(id AUTOINCREMENT));";
-  final String createProfile = "CREATE TABLE IF NOT EXISTS profile (login	TEXT NOT NULL, password	TEXT NOT NULL, cash	INTEGER NOT NULL)";
+  DBStorage();
+
+  final String createStudents = "CREATE TABLE IF NOT EXISTS students (id	INTEGER NOT NULL UNIQUE,  active INTEGER NOT NULL DEFAULT 1, name	TEXT NOT NULL,phone	TEXT NOT NULL,parents	TEXT NOT NULL,sex	INTEGER NOT NULL,PRIMARY KEY(id AUTOINCREMENT));";
+  final String createPayments = "CREATE TABLE IF NOT EXISTS payments (id	INTEGER NOT NULL UNIQUE,  active INTEGER NOT NULL DEFAULT 1, date	TEXT NOT NULL, time	TEXT NOT NULL, student_id	INTEGER NOT NULL, credit	INTEGER NOT NULL, type	TEXT NOT NULL, FOREIGN KEY(student_id) REFERENCES students(id),PRIMARY KEY(id AUTOINCREMENT));";
+  final String createCosts = "CREATE TABLE IF NOT EXISTS costs (id	INTEGER NOT NULL UNIQUE,  active INTEGER NOT NULL DEFAULT 1, product	TEXT NOT NULL, cost	INTEGER NOT NULL, date	TEXT NOT NULL, time	TEXT NOT NULL, PRIMARY KEY(id AUTOINCREMENT));";
+  final String createVisits = "CREATE TABLE IF NOT EXISTS visits (id	INTEGER NOT NULL UNIQUE,  active INTEGER NOT NULL DEFAULT 1, student_id	INTEGER NOT NULL, date	TEXT NOT NULL, time	TEXT NOT NULL, type	TEXT NOT NULL, FOREIGN KEY(student_id) REFERENCES students(id),PRIMARY KEY(id AUTOINCREMENT));";
+  final String createGroupTypes = "CREATE TABLE IF NOT EXISTS group_types (id	INTEGER NOT NULL UNIQUE,  active INTEGER NOT NULL DEFAULT 1, name	TEXT NOT NULL,PRIMARY KEY(id AUTOINCREMENT));";
+  final String createGroups = "CREATE TABLE IF NOT EXISTS groups (id	INTEGER NOT NULL UNIQUE,  active INTEGER NOT NULL DEFAULT 1, name	TEXT NOT NULL,time	TEXT NOT NULL,duration	TEXT NOT NULL,weekday	INTEGER NOT NULL,group_type	INTEGER NOT NULL,PRIMARY KEY(id AUTOINCREMENT),FOREIGN KEY(group_type) REFERENCES group_types(id));";
+  final String createGroupsStudents = "CREATE TABLE IF NOT EXISTS groups_students (id	INTEGER NOT NULL UNIQUE,  active INTEGER NOT NULL DEFAULT 1, group_id	INTEGER NOT NULL, student_id	INTEGER NOT NULL, PRIMARY KEY(id AUTOINCREMENT),FOREIGN KEY(group_id) REFERENCES groups(id),FOREIGN KEY(student_id) REFERENCES students(id));";
+  final String createCourses = "CREATE TABLE IF NOT EXISTS courses (id	INTEGER NOT NULL UNIQUE,  active INTEGER NOT NULL DEFAULT 1, name	TEXT NOT NULL, payment	INTEGER NOT NULL, lessons	INTEGER NOT NULL, PRIMARY KEY(id AUTOINCREMENT));";
+  final String createCoursesStudents = "CREATE TABLE IF NOT EXISTS courses_students (id	INTEGER NOT NULL UNIQUE,  active INTEGER NOT NULL DEFAULT 1, course_id	INTEGER NOT NULL, student_id	INTEGER NOT NULL, FOREIGN KEY(student_id) REFERENCES students(id),FOREIGN KEY(course_id) REFERENCES courses(id),PRIMARY KEY(id AUTOINCREMENT));";
+  final String createProfile = "CREATE TABLE IF NOT EXISTS profile (name	TEXT NOT NULL,  login	TEXT NOT NULL, password	TEXT NOT NULL, cash	INTEGER NOT NULL)";
 
   createTables(Database db) async {
     await db.execute(createStudents);
@@ -41,7 +48,17 @@ class DBStorage {
     await db.execute("DROP TABLE profile IF EXISTS");
   }
 
-  Future<Database> initializeDB() async {
+  Future<Database> getDB() async {
+    var databasesPath = await getDatabasesPath();
+    String path = join(databasesPath, 'client.db');
+
+    Database database = await openDatabase(
+      path,
+    );
+    return await database;
+  }
+
+  initializeDB() async {
     var databasesPath = await getDatabasesPath();
     String path = join(databasesPath, 'client.db');
 
@@ -61,4 +78,24 @@ class DBStorage {
 
     await database.close();
   }
+
+
+  Future<List<Payment>> getPayments() async {
+    final db = await getDB();
+    var data = await db.query("payments");
+    return  data.isNotEmpty ? data.map((p) => Payment.fromJson(p)).toList() : [];
+  }
+
+  Future<List<Student>> getStudents() async {
+    final db = await getDB();
+    var data = await db.query("students");
+    return data.isNotEmpty ? data.map((p) => Student.fromJson(p)).toList() : [];
+  }
+
+  Future<List<Visit>> getVisits() async {
+    final db = await getDB();
+    var data = await db.query("visits");
+    return data.isNotEmpty ? data.map((v) => Visit.fromJson(v)).toList() : [];
+  }
+
 }

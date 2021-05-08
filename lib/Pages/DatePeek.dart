@@ -58,12 +58,10 @@ class _DatePeekState extends State<DatePeek> {
     days.forEach((element) {
       bool currentDay = false;
       _days.forEach((day) {
-        print(day);
         if (element.index == day) currentDay = true;
       });
       if (currentDay) {
         active_days.add(element);
-        print(active_days);
       }
     });
   }
