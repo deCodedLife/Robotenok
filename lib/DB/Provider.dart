@@ -5,7 +5,10 @@ import 'package:sqflite/sqflite.dart';
 
 import 'Payments.dart';
 import 'Students.dart';
+import 'Courses.dart';
 import 'Visits.dart';
+import 'Groups.dart';
+import 'Costs.dart';
 
 class DBStorage {
 
@@ -19,7 +22,7 @@ class DBStorage {
   final String createGroups = "CREATE TABLE IF NOT EXISTS groups (id	INTEGER NOT NULL UNIQUE,  active INTEGER NOT NULL DEFAULT 1, name	TEXT NOT NULL,time	TEXT NOT NULL,duration	TEXT NOT NULL,weekday	INTEGER NOT NULL,group_type	INTEGER NOT NULL,PRIMARY KEY(id AUTOINCREMENT),FOREIGN KEY(group_type) REFERENCES group_types(id));";
   final String createGroupsStudents = "CREATE TABLE IF NOT EXISTS groups_students (id	INTEGER NOT NULL UNIQUE,  active INTEGER NOT NULL DEFAULT 1, group_id	INTEGER NOT NULL, student_id	INTEGER NOT NULL, PRIMARY KEY(id AUTOINCREMENT),FOREIGN KEY(group_id) REFERENCES groups(id),FOREIGN KEY(student_id) REFERENCES students(id));";
   final String createCourses = "CREATE TABLE IF NOT EXISTS courses (id	INTEGER NOT NULL UNIQUE,  active INTEGER NOT NULL DEFAULT 1, name	TEXT NOT NULL, payment	INTEGER NOT NULL, lessons	INTEGER NOT NULL, PRIMARY KEY(id AUTOINCREMENT));";
-  final String createCoursesStudents = "CREATE TABLE IF NOT EXISTS courses_students (id	INTEGER NOT NULL UNIQUE,  active INTEGER NOT NULL DEFAULT 1, course_id	INTEGER NOT NULL, student_id	INTEGER NOT NULL, FOREIGN KEY(student_id) REFERENCES students(id),FOREIGN KEY(course_id) REFERENCES courses(id),PRIMARY KEY(id AUTOINCREMENT));";
+  final String createCoursesGroups = "CREATE TABLE courses_groups (id	INTEGER NOT NULL UNIQUE, course_id	INTEGER NOT NULL,group_id	INTEGER NOT NULL,FOREIGN KEY(course_id) REFERENCES courses(id),FOREIGN KEY(group_id) REFERENCES groups(id),PRIMARY KEY(id AUTOINCREMENT));";
   final String createProfile = "CREATE TABLE IF NOT EXISTS profile (name	TEXT NOT NULL,  login	TEXT NOT NULL, password	TEXT NOT NULL, cash	INTEGER NOT NULL)";
 
   createTables(Database db) async {
@@ -31,7 +34,7 @@ class DBStorage {
     await db.execute(createGroups);
     await db.execute(createGroupsStudents);
     await db.execute(createCourses);
-    await db.execute(createCoursesStudents);
+    await db.execute(createCoursesGroups);
     await db.execute(createProfile);
   }
 
@@ -44,7 +47,7 @@ class DBStorage {
     await db.execute("DROP TABLE groups IF EXISTS");
     await db.execute("DROP TABLE groups_students IF EXISTS");
     await db.execute("DROP TABLE courses IF EXISTS");
-    await db.execute("DROP TABLE courses_students IF EXISTS");
+    await db.execute("DROP TABLE courses_groups IF EXISTS");
     await db.execute("DROP TABLE profile IF EXISTS");
   }
 
@@ -98,4 +101,21 @@ class DBStorage {
     return data.isNotEmpty ? data.map((v) => Visit.fromJson(v)).toList() : [];
   }
 
+  Future<List<Group>> getGroups() async {
+    final db = await getDB();
+    var data = await db.query("groups");
+    return data.isNotEmpty ? data.map((g) => Group.fromJson(g)).toList() : [];
+  }
+
+  Future<List<Course>> getCourses() async {
+    final db = await getDB();
+    var data = await db.query("courses");
+    return data.isNotEmpty ? data.map((c) => Course.fromJson(c)).toList() : [];
+  }
+
+  Future<List<Cost>> getCosts() async {
+    final db = await getDB();
+    var data = await db.query("costs");
+    return data.isNotEmpty ? data.map((c) => Cost.fromJson(c)).toList() : [];
+  }
 }
