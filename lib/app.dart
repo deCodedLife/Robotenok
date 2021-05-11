@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import 'DB/Provider.dart';
-
 import 'Pages/MainPage.dart';
 import 'Pages/DatePeek.dart';
+
+// Testing imports
+import 'DB/Visits.dart';
+import 'DB/Costs.dart';
+import 'DB/Courses.dart';
+import 'DB/Groups.dart';
+import 'DB/Payments.dart';
+import 'DB/Profile.dart';
+import 'DB/Provider.dart';
+import 'DB/Students.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -36,8 +44,62 @@ class _LandingPageState extends State<LandingPage> {
   DBStorage handler = DBStorage();
 
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    super.initState();
     handler.initializeDB();
+    testDB();
+  }
+
+  testDB() async
+  {
+    Group newGroup = new Group(
+      name: "Среда 16:30",
+      duration: 100,
+      time: "16:30"
+    );
+    Group().create(newGroup);
+
+    Course newCourse = new Course(
+      name: "Робототехника WeDo",
+      lessons: 16,
+      payment: 2800,
+    );
+    Course().add(newCourse);
+
+    var student = await DBStorage().getStudents();
+
+    Payment newPayment = new Payment(
+      time: DateTime.now().hour.toString() + ":" + DateTime.now().second.toString(),
+      date: DateTime.now().day.toString() + "." + DateTime.now().month.toString() + "." + DateTime.now().year.toString(),
+      type: "cash",
+      credit: 2800,
+      studentID: student.first.id
+    );
+
+    var couses = await DBStorage().getCourses();
+    var groups = await DBStorage().getGroups();
+
+    GroupStudents newGroupStudent = new GroupStudents(
+        studentID: student.first.id,
+        groupID: groups.first.id
+    );
+
+    CoursesGroups newCourseGroup = new CoursesGroups(
+      groupID: groups.first.id,
+      courseID: couses.first.id
+    );
+
+    Visit newVisit = new Visit(
+      studentID: student.first.id,
+      type: "intramural",
+      time: DateTime.now().hour.toString() + ":" + DateTime.now().second.toString(),
+      date: DateTime.now().day.toString() + "." + DateTime.now().month.toString() + "." + DateTime.now().year.toString()
+    );
+    Visit().create(newVisit);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: PageView(
         controller: controller,

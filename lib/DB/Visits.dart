@@ -71,13 +71,11 @@ class Visit
   Future<void> create(Visit visit) async {
     final db = await initDB();
     await db.insert("visits", visit.toJson());
-    await db.close();
   }
 
   Future<void> update(Visit visit) async {
     final db = await initDB();
     await db.update("visits", visit.toJson());
-    await db.close();
   }
 
   Future<void> delete(Visit visit) async {

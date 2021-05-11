@@ -51,7 +51,6 @@ class Profile
       "profile",
       profile.toJson()
     );
-    await db.close();
   }
 
   Future<void> update(Profile, profile) async {
@@ -60,13 +59,11 @@ class Profile
         "profile",
         profile.toJson()
     );
-    await db.close();
   }
 
   Future<void> delete(Profile profile) async {
     final db = await initDB();
     await db.execute("DELETE * FROM profile");
-    await db.close();
   }
 
 }

@@ -19,7 +19,7 @@ class DBStorage {
   final String createCosts = "CREATE TABLE IF NOT EXISTS costs (id	INTEGER NOT NULL UNIQUE,  active INTEGER NOT NULL DEFAULT 1, product	TEXT NOT NULL, cost	INTEGER NOT NULL, date	TEXT NOT NULL, time	TEXT NOT NULL, PRIMARY KEY(id AUTOINCREMENT));";
   final String createVisits = "CREATE TABLE IF NOT EXISTS visits (id	INTEGER NOT NULL UNIQUE,  active INTEGER NOT NULL DEFAULT 1, student_id	INTEGER NOT NULL, date	TEXT NOT NULL, time	TEXT NOT NULL, type	TEXT NOT NULL, FOREIGN KEY(student_id) REFERENCES students(id),PRIMARY KEY(id AUTOINCREMENT));";
   final String createGroupTypes = "CREATE TABLE IF NOT EXISTS group_types (id	INTEGER NOT NULL UNIQUE,  active INTEGER NOT NULL DEFAULT 1, name	TEXT NOT NULL,PRIMARY KEY(id AUTOINCREMENT));";
-  final String createGroups = "CREATE TABLE IF NOT EXISTS groups (id	INTEGER NOT NULL UNIQUE,  active INTEGER NOT NULL DEFAULT 1, name	TEXT NOT NULL,time	TEXT NOT NULL,duration	TEXT NOT NULL,weekday	INTEGER NOT NULL,group_type	INTEGER NOT NULL,PRIMARY KEY(id AUTOINCREMENT),FOREIGN KEY(group_type) REFERENCES group_types(id));";
+  final String createGroups = "CREATE TABLE IF NOT EXISTS groups (id	INTEGER NOT NULL UNIQUE,  active INTEGER NOT NULL DEFAULT 1, name	TEXT NOT NULL,time	TEXT NOT NULL,duration	INTEGER NOT NULL,weekday	INTEGER NOT NULL,group_type	INTEGER NOT NULL,PRIMARY KEY(id AUTOINCREMENT),FOREIGN KEY(group_type) REFERENCES group_types(id));";
   final String createGroupsStudents = "CREATE TABLE IF NOT EXISTS groups_students (id	INTEGER NOT NULL UNIQUE,  active INTEGER NOT NULL DEFAULT 1, group_id	INTEGER NOT NULL, student_id	INTEGER NOT NULL, PRIMARY KEY(id AUTOINCREMENT),FOREIGN KEY(group_id) REFERENCES groups(id),FOREIGN KEY(student_id) REFERENCES students(id));";
   final String createCourses = "CREATE TABLE IF NOT EXISTS courses (id	INTEGER NOT NULL UNIQUE,  active INTEGER NOT NULL DEFAULT 1, name	TEXT NOT NULL, payment	INTEGER NOT NULL, lessons	INTEGER NOT NULL, PRIMARY KEY(id AUTOINCREMENT));";
   final String createCoursesGroups = "CREATE TABLE courses_groups (id	INTEGER NOT NULL UNIQUE, course_id	INTEGER NOT NULL,group_id	INTEGER NOT NULL,FOREIGN KEY(course_id) REFERENCES courses(id),FOREIGN KEY(group_id) REFERENCES groups(id),PRIMARY KEY(id AUTOINCREMENT));";
@@ -78,8 +78,6 @@ class DBStorage {
         await createTables(db);
       },
     );
-
-    await database.close();
   }
 
 

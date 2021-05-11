@@ -68,7 +68,6 @@ class Payment {
       payment.toJson(),
       conflictAlgorithm: ConflictAlgorithm.replace
     );
-    await db.close();
   }
 
   Future<void> update(Payment payment) async {
@@ -77,7 +76,6 @@ class Payment {
         "payments",
         payment.toJson()
     );
-    await db.close();
   }
 
   Future<void> deletePayment(Payment payment) async {

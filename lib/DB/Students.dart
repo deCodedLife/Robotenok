@@ -43,7 +43,7 @@ class Student
     final Future<Database> database = openDatabase(
       join(await getDatabasesPath(), 'client.db'),
     );
-    return await database;
+    return database;
   }
 
   Future<Student> get(int id) async {
@@ -59,7 +59,6 @@ class Student
       student.toJson(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
-    await db.close();
   }
 
   update(Student student) async {
@@ -69,7 +68,6 @@ class Student
       student.toJson(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
-    await db.close();
   }
 
   remove(Student student) async {

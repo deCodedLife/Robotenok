@@ -44,13 +44,11 @@ class GroupStudents
   Future<void> add(GroupStudents data) async {
     final db = await initDB();
     await db.insert("groups_students", data.toJson());
-    await db.close();
   }
   
   Future<void> clear(int student) async {
     final db = await initDB();
     await db.delete("groups_students", where: "student_id = ?", whereArgs: [student]);
-    await db.close();
   }
 }
 
@@ -59,7 +57,7 @@ class Group
   int id;
   String name;
   String time;
-  String duration;
+  int duration;
   int active;
 
   Group({
@@ -102,13 +100,11 @@ class Group
   Future<void> create(Group group) async {
     final db = await initDB();
     await db.insert("groups", group.toJson());
-    await db.close();
   }
 
   Future<void> update(Group group) async {
     final db = await initDB();
     await db.update("groups", group.toJson());
-    await db.close();
   }
 
   Future<void> delete(Group group) async {
