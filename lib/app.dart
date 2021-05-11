@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:robotenok/API/Auth.dart';
 
 import 'DB/Provider.dart';
 import 'Pages/MainPage.dart';
@@ -13,6 +14,8 @@ import 'DB/Payments.dart';
 import 'DB/Profile.dart';
 import 'DB/Provider.dart';
 import 'DB/Students.dart';
+
+import 'API/Server.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -96,6 +99,15 @@ class _LandingPageState extends State<LandingPage> {
       date: DateTime.now().day.toString() + "." + DateTime.now().month.toString() + "." + DateTime.now().year.toString()
     );
     Visit().create(newVisit);
+  }
+
+  testServer () {
+    AuthProvider auth = new AuthProvider();
+    auth.initData("codedlife", "8895304025");
+
+    Server srv = new Server(
+      authProvider: auth
+    );
   }
 
   @override
