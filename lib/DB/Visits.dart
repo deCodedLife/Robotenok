@@ -54,6 +54,13 @@ class Visit
     "active": active
   };
 
+  Map<String, dynamic> export() => {
+    "student_id": studentID,
+    "date": date,
+    "time": time,
+    "type": type
+  };
+
   Future<Database> initDB() async {
     final Future<Database> database = openDatabase(
       join(await getDatabasesPath(), 'client.db'),
@@ -70,7 +77,7 @@ class Visit
 
   Future<void> create(Visit visit) async {
     final db = await initDB();
-    await db.insert("visits", visit.toJson());
+    await db.insert("visits", visit.export());
   }
 
   Future<void> update(Visit visit) async {

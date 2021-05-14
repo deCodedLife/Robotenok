@@ -52,6 +52,47 @@ class GroupStudents
   }
 }
 
+class GroupType {
+  int id;
+  String name;
+
+  GroupType({this.id, this.name});
+
+  factory GroupType.fromJson(Map<String, dynamic> json) => GroupType(
+    id: json["id"],
+    name: json["name"]
+  );
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "name": name
+  };
+
+  Map<String, dynamic> export() => {
+    "name": name
+  };
+
+  Future<Database> initDB() async {
+    final Future<Database> database = openDatabase(
+      join(await getDatabasesPath(), 'client.db'),
+    );
+    final db = await database;
+    return db;
+  }
+
+  Future<GroupType> get(int id) async {
+    final db = await initDB();
+    var data = await db.query("group_types", where: "id = ?", whereArgs: [id]);
+    return data.isNotEmpty ? GroupType.fromJson(data.first) : Null;
+  }
+
+  Future<void> add(GroupType data) async {
+    final db = await initDB();
+    await db.insert("group_types", data.export());
+  }
+
+}
+
 class Group
 {
   int id;
@@ -59,20 +100,27 @@ class Group
   String time;
   int duration;
   int active;
+  int weekday;
+  int groupType;
 
   Group({
     this.id,
     this.name,
     this.time,
     this.duration,
-    this.active
+    this.active,
+    this.weekday,
+    this.groupType
   });
 
   factory Group.fromJson(Map<String, dynamic> json) => new Group(
     id: json["id"],
     name: json["name"],
     time: json["time"],
-    duration: json["duration"]
+    duration: json["duration"],
+    active: json["active"],
+    weekday: json["weekday"],
+    groupType: json["group_type"]
   );
 
   Map<String, dynamic> toJson() => {
@@ -80,7 +128,17 @@ class Group
     "name": name,
     "time": time,
     "duration": duration,
-    "active": active
+    "active": active,
+    "weekday": weekday,
+    "group_type": groupType
+  };
+
+  Map<String, dynamic> export() => {
+    "name": name,
+    "time": time,
+    "duration": duration,
+    "weekday": weekday,
+    "group_type": groupType
   };
 
   Future<Database> initDB() async {
@@ -99,7 +157,7 @@ class Group
 
   Future<void> create(Group group) async {
     final db = await initDB();
-    await db.insert("groups", group.toJson());
+    await db.insert("groups", group.export());
   }
 
   Future<void> update(Group group) async {

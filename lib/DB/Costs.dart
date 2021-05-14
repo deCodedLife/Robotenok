@@ -39,6 +39,13 @@ class Cost
     "active": active
   };
 
+  Map<String, dynamic> export() => {
+    "product": product,
+    "cost": cost,
+    "date": date,
+    "time": time
+  };
+
   Future<Database> initDB() async {
     final Future<Database> database = openDatabase(
       join(await getDatabasesPath(), 'client.db'),
@@ -55,7 +62,7 @@ class Cost
 
   Future<void> add(Cost cost) async {
     final db = await initDB();
-    await db.insert("costs", cost.toJson());
+    await db.insert("costs", cost.export());
     await db.close();
   }
 

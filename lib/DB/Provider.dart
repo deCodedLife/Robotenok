@@ -105,6 +105,12 @@ class DBStorage {
     return data.isNotEmpty ? data.map((g) => Group.fromJson(g)).toList() : [];
   }
 
+  Future<List<GroupType>> getGroupsTypes() async {
+    final db = await getDB();
+    var data = await db.query("group_types");
+    return data.isNotEmpty ? data.map((g) => GroupType.fromJson(g)).toList() : [];
+  }
+
   Future<List<Course>> getCourses() async {
     final db = await getDB();
     var data = await db.query("courses");

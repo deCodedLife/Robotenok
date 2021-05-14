@@ -49,23 +49,38 @@ class _LandingPageState extends State<LandingPage> {
   @override
   void initState() {
     super.initState();
-    handler.initializeDB();
-    testDB();
   }
 
   testDB() async
   {
+    Student newStudent = new Student(
+      name: "Руслана Даниева",
+      sex: 0,
+      parents: "",
+      phone: "8-978-722-23-94"
+    );
+    Student().create(newStudent);
+
+    GroupType newGroupType = new GroupType(
+      name: "WeDo"
+    );
+    GroupType().add(newGroupType);
+
+    var groupTypes = await DBStorage().getGroupsTypes();
+
     Group newGroup = new Group(
       name: "Среда 16:30",
       duration: 100,
-      time: "16:30"
+      time: "16:30",
+      weekday: DateTime.wednesday,
+      groupType: groupTypes.first.id
     );
     Group().create(newGroup);
 
     Course newCourse = new Course(
       name: "Робототехника WeDo",
       lessons: 16,
-      payment: 2800,
+      payment: 2800
     );
     Course().add(newCourse);
 
@@ -78,6 +93,7 @@ class _LandingPageState extends State<LandingPage> {
       credit: 2800,
       studentID: student.first.id
     );
+    Payment().newPayment(newPayment);
 
     var couses = await DBStorage().getCourses();
     var groups = await DBStorage().getGroups();
@@ -86,11 +102,13 @@ class _LandingPageState extends State<LandingPage> {
         studentID: student.first.id,
         groupID: groups.first.id
     );
+    GroupStudents().add(newGroupStudent);
 
     CoursesGroups newCourseGroup = new CoursesGroups(
       groupID: groups.first.id,
-      courseID: couses.first.id
+      courseID: couses.first.id,
     );
+    CoursesGroups().add(newCourseGroup);
 
     Visit newVisit = new Visit(
       studentID: student.first.id,
@@ -108,10 +126,17 @@ class _LandingPageState extends State<LandingPage> {
     Server srv = new Server(
       authProvider: auth
     );
+
+    srv.authProvider.getToken();
+    print("Server done");
   }
 
   @override
   Widget build(BuildContext context) {
+    // testServer;
+    var task = handler.initializeDB();
+    testDB();
+
     return Scaffold(
       body: PageView(
         controller: controller,

@@ -53,6 +53,14 @@ class Payment {
     "active": active
   };
 
+  Map<String, dynamic> export() => {
+    "date": date,
+    "time": time,
+    "student_id": studentID,
+    "credit": credit,
+    "type": type,
+  };
+
   Future<Database> initDB() async {
     final Future<Database> database = openDatabase(
       join(await getDatabasesPath(), 'client.db'),
@@ -65,7 +73,7 @@ class Payment {
     final db = await initDB();
     await db.insert(
       "payments",
-      payment.toJson(),
+      payment.export(),
       conflictAlgorithm: ConflictAlgorithm.replace
     );
   }

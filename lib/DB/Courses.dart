@@ -27,6 +27,11 @@ class CoursesGroups
       "group_id": groupID
     };
 
+    Map<String, dynamic> export() => {
+      "course_id": courseID,
+      "group_id": groupID
+    };
+
     Future<Database> initDB() async {
       final Future<Database> database = openDatabase(
         join(await getDatabasesPath(), 'client.db'),
@@ -44,13 +49,11 @@ class CoursesGroups
     Future<void> clear(int group) async {
       final db = await initDB();
       await db.delete("courses_groups", where: "group_id = ?", whereArgs: [groupID]);
-      await db.close();
     }
 
     Future<void> add(CoursesGroups data) async {
       final db = await initDB();
-      await db.insert("courses_groups", data.toJson());
-      await db.close();
+      await db.insert("courses_groups", data.export());
     }
 }
 
@@ -86,6 +89,12 @@ class Course
     "active": active
   };
 
+  Map<String, dynamic> export() => {
+    "name": name,
+    "payment": payment,
+    "lessons": lessons
+  };
+
   Future<Database> initDB() async {
     final Future<Database> database = openDatabase(
       join(await getDatabasesPath(), 'client.db'),
@@ -102,7 +111,7 @@ class Course
 
   Future<void> add(Course course) async {
     final db = await initDB();
-    await db.insert("courses", course.toJson());
+    await db.insert("courses", course.export());
     await db.close();
   }
 
