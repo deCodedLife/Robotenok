@@ -3,19 +3,19 @@ import 'dart:async';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
-class GroupStudents
+class GroupStudent
 {
   int id;
   int groupID;
   int studentID;
   
-  GroupStudents({
+  GroupStudent({
     this.id,
     this.groupID,
     this.studentID
   });
   
-  factory GroupStudents.fromJson(Map<String, dynamic> json) => new GroupStudents(
+  factory GroupStudent.fromJson(Map<String, dynamic> json) => new GroupStudent(
     id: json["id"],
     groupID: json["group_id"],
     studentID: json["student_id"]
@@ -35,13 +35,13 @@ class GroupStudents
     return db;
   }
 
-  Future<List<GroupStudents>> get(int student) async {
+  Future<List<GroupStudent>> get(int student) async {
     final db = await initDB();
     var data = await db.query("groups_students", where: "student_id = ?", whereArgs: [student]);
-    return data.isNotEmpty ? data.map((s) => GroupStudents.fromJson(s)).toList() : [];
+    return data.isNotEmpty ? data.map((s) => GroupStudent.fromJson(s)).toList() : [];
   }
   
-  Future<void> add(GroupStudents data) async {
+  Future<void> add(GroupStudent data) async {
     final db = await initDB();
     await db.insert("groups_students", data.toJson());
   }
@@ -91,6 +91,31 @@ class GroupType {
     await db.insert("group_types", data.export());
   }
 
+}
+
+class GroupCurator
+{
+  int id;
+  int groupID;
+  int userID;
+
+  GroupCurator({
+      this.id,
+      this.groupID,
+      this.userID
+  });
+
+  factory GroupCurator.fromJson(Map<String, dynamic> json) => new GroupCurator(
+    id: json["id"],
+    groupID: json["group_id"],
+    userID: json["user_id"]
+  );
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "group_id": groupID,
+    "user_id": userID
+  };
 }
 
 class Group

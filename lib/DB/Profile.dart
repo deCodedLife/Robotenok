@@ -3,31 +3,59 @@ import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
+
+Profile localProfile = new Profile(
+  id: 1,
+  name: "Григорий Кесимин",
+  login: "CodedLife",
+  password: "\$wnkd.K^^ntD.",
+  profileImage: "",
+  type: "admin",
+  cash: 0
+);
+
+
 class Profile
 {
+  int id;
   String name;
   String login;
   String password;
+  String profileImage;
+  String type;
   int cash;
 
+  String token;
+
   Profile({
+    this.id,
     this.name,
     this.login,
     this.password,
-    this.cash
+    this.profileImage,
+    this.type,
+    this.cash,
+    this.token
   });
 
   factory Profile.fromJson(Map<String, dynamic> json) => new Profile(
+    id: json["id"],
     name: json["name"],
     login: json["login"],
     password: json["password"],
-    cash: json["cash"]
+    profileImage: json["image"],
+    type: json["type"],
+    cash: json["cash"],
+    token: json["secret"]
   );
 
   Map<String, dynamic> toJson() => {
+    "id": id,
     "name": name,
     "login": login,
     "password": password,
+    "image": profileImage,
+    "type": type,
     "cash": cash
   };
 

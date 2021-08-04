@@ -1,188 +1,196 @@
 import 'package:flutter/material.dart';
-
-class GroupsList {
-  int weak;
-  String time;
-  String title;
-  int dateIndex;
-  Image icon;
-  int typeIndex;
-
-  GroupsList(this.weak, this.time, this.title, this.dateIndex, this.icon, this.typeIndex);
-}
+import 'package:flutter/rendering.dart';
+import 'Group.dart';
 
 class GroupsPage extends StatefulWidget {
-  int selectedDay;
-  int selectedType;
-
-  GroupsPage(this.selectedType, {
-    Key key,
-    @required this.selectedDay,
-  }) : super(key : key);
-
   @override
   _GroupsPageState createState() => _GroupsPageState();
 }
 
 class _GroupsPageState extends State<GroupsPage> {
+  List<int> selectedTiles = [];
 
-  List<GroupsList> groups = [
-    GroupsList(
-        DateTime.saturday,
-        "9:30 - 12:15",
-        "Mindstorms утро",
-        6,
-        Image.asset("assets/mindstorms.png"),
-        4
-    ),
-    GroupsList(
-      DateTime.saturday,
-      "13:00 - 15:35",
-      "Mindstorms день",
-      6,
-      Image.asset("assets/mindstorms.png"),
-      4
-    ),
-    GroupsList(
-      DateTime.saturday,
-      "16:00 - 17:40",
-      "Scratch вечер",
-      6,
-      Image.asset("assets/scratch.png"),
-      3
-    ),
-    GroupsList(
-      DateTime.saturday,
-      "18:00 - 19:40",
-      "Дизайн вечер",
-      6,
-      Image.asset("assets/designers.png"),
-      0
-    ),
 
-    GroupsList(
-      DateTime.sunday,
-      "9:30 - 11:10",
-      "Вэб утро",
-      6,
-      Image.asset("assets/web.png"),
-      1
-    ),
-    GroupsList(
-      DateTime.sunday,
-      "11:30 - 13:10",
-      "Вэб утро",
-      6,
-      Image.asset("assets/web.png"),
-      1
-    ),
-    GroupsList(
-      DateTime.sunday,
-      "14:00 - 15:40",
-      "Вэб день",
-      6,
-      Image.asset("assets/web.png"),
-      1
-    ),
-    GroupsList(
-        DateTime.sunday,
-        "16:00 - 17:40",
-        "Scratch вечер",
-        6,
-        Image.asset("assets/scratch.png"),
-      3
-    ),
+  Widget GroupTile(BuildContext context, int index) {
+    bool _isSelected = false;
 
-    GroupsList(
-        DateTime.thursday,
-        "10:00 - 11:40",
-        "WeDo утро",
-        6,
-        Image.asset("assets/wedo.png"),
-      2
-    ),
-    GroupsList(
-        DateTime.thursday,
-        "16:00 - 17:40",
-        "Дизайн вечер",
-        6,
-        Image.asset("assets/designers.png"),
-      0
-    ),
-    GroupsList(
-        DateTime.thursday,
-        "18:00 - 19:40",
-        "Дизайн вечер",
-        6,
-        Image.asset("assets/designers.png"),
-      0
-    ),
-
-    GroupsList(
-        DateTime.wednesday,
-        "16:00 - 17:40",
-        "WeDo утро",
-        6,
-        Image.asset("assets/wedo.png"),
-      2
-    ),
-  ];
-
-  List<GroupsList> selected = new List<GroupsList>();
-
-  getItems () {
-    var day = widget.selectedDay;
-
-    if (widget.selectedType != -1) {
-      groups.forEach((element) {
-        if (element.typeIndex == widget.selectedType) {
-          selected.add(element);
-        }
-      });
-    } else {
-      groups.forEach((element) {
-        if ((element.weak - 1) == day) {
-          selected.add(element);
-        }
-      });
+    for (int tile in selectedTiles) {
+      if (index == tile) {
+        _isSelected = true;
+      }
     }
-  }
 
-  @override
-  Widget build(BuildContext context) {
-    getItems();
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "Список групп",
-          style: TextStyle(
-          color: Colors.white
-          ),
-        ),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () { Navigator.of(context).pop(); },
-        ),
-      ),
-      body: GestureDetector(
-        onPanUpdate: (details) {
-          if (details.delta.dx < 0) {
-            Navigator.of(context).pop();
+    return Padding(
+      padding: EdgeInsets.all(5),
+      child: GestureDetector(
+        onTap: () {
+          if (_isSelected) {
+            selectedTiles.remove(index);
+          } else {
+            selectedTiles.add(index);
           }
+          setState(() {});
         },
-        child: ListView.builder(
-          itemCount: selected.length,
-          itemBuilder: (context, index) => GroupsViewer(context, index),
+        child: Container(
+          padding: EdgeInsets.only(left: 5, right: 5),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: _isSelected ? Theme.of(context).accentColor : Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(5))
+          ),
+          child: Text(
+            "Lego Mindstorms",
+            style: TextStyle(
+              color: _isSelected ? Colors.white : Colors.black,
+              fontSize: 16,
+              fontWeight: FontWeight.bold
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget GroupsViewer(BuildContext context, int index) {
-    return ListTile(
-      leading: selected.elementAt(index).icon,
-      subtitle: Text(selected.elementAt(index).time),
-      title: Text(selected.elementAt(index).title),
+  Widget GroupCard(BuildContext context, int index) {
+    return Card(
+      child: GestureDetector(
+        onTap: () {
+          Navigator.of(context).push(MaterialPageRoute(builder: (context) => GroupPage()));
+        },
+        child: Stack(
+          fit: StackFit.loose,
+          children: [
+            BackgroundImage(),
+            Container(
+              width: double.infinity,
+              height: 200,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Name(),
+                  Payment()
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Color.fromARGB(0, 0, 0, 0),
+        elevation: 0,
+        centerTitle: true,
+        title: Text(
+          "Группы",
+          style: TextStyle(
+              color: Colors.black
+          ),
+        ),
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: Icon(Icons.add, color: Colors.black),
+          )
+        ],
+      ),
+      body: Column(
+        children: [
+          ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: double.infinity, maxHeight: 64),
+            child: ListView.builder(
+              padding: EdgeInsets.all(5),
+              scrollDirection: Axis.horizontal,
+              itemCount: 5,
+              itemBuilder: (context, index) => GroupTile(context, index),
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: 5,
+              padding: EdgeInsets.all(10),
+              itemBuilder: (context, index) => GroupCard(context, index),
+            ),
+          )
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add),
+        onPressed: () {},
+      ),
+    );
+  }
+}
+
+class Name extends StatelessWidget {
+  const Name({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+        "Суббота 10:00",
+        style: TextStyle(
+          fontSize: 26,
+          color: Colors.white,
+          fontWeight: FontWeight.bold
+        ),
+    );
+  }
+}
+
+class Payment extends StatelessWidget {
+  const Payment({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          Icons.monetization_on,
+          color: Colors.white,
+        ),
+        Text(
+          "2800",
+          style: TextStyle(
+              fontSize: 20,
+              color: Colors.white,
+              fontWeight: FontWeight.bold
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class BackgroundImage extends StatelessWidget {
+  const BackgroundImage({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: 200,
+      child: Container(
+        color: Color.fromARGB(100, 0, 0, 0),
+      ),
+      decoration: BoxDecoration(
+        image: DecorationImage(
+            image: AssetImage("assets/bg_wedo.jpg"),
+            fit: BoxFit.fitWidth
+        ),
+      ),
     );
   }
 }

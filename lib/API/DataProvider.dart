@@ -7,20 +7,47 @@ class DataPack
     this.body,
     this.token
   });
+
+  Map<String, dynamic> toJson() => {
+    "token": token,
+    "body": body
+  };
+
 }
 
-class ResponcePack
+class RespString
 {
-  String status;
-  Map<String, dynamic> responce;
+  int status;
+  String response;
 
-  ResponcePack({
+  RespString({
     this.status,
-    this.responce
+    this.response
   });
 
-  factory ResponcePack.fromJson( Map<String, dynamic> json ) => new ResponcePack(
+  factory RespString.fromJson( Map<String, dynamic> json ) => new RespString(
     status: json["status"],
-    responce: json["response"],
+    response: json["response"],
+  );
+}
+
+class RespDynamic
+{
+  int status;
+  List<dynamic> body;
+
+  RespDynamic({
+    this.status,
+    this.body
+  });
+
+  Map<String, dynamic> toJson() => {
+    "status": status,
+    "response": body
+  };
+
+  factory RespDynamic.fromJson( Map<String, dynamic> json ) => new RespDynamic(
+    status: json["status"],
+    body: json["response"],
   );
 }

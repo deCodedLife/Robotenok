@@ -5,6 +5,7 @@ import '../DB/Profile.dart';
 import 'DataProvider.dart';
 
 import 'package:http/http.dart' as http;
+import 'package:crypto/crypto.dart';
 
 class AuthData
 {
@@ -17,7 +18,7 @@ class AuthData
   });
 
   String generateHash(String password) {
-    hash = password.toUpperCase();
+    return  sha512.convert( utf8.encode(password) ).toString();
   }
 
   Map<String, dynamic> toJson() => {
@@ -43,17 +44,22 @@ class AuthProvider
     );
   }
 
-  getToken () async {
-    var responce = await http.post( Uri.http("95.142.40.58", "robotenok/auth"), body: data.toJson() );
+  Future<void> getToken () async {
+    var response = await http.post(
+        Uri.http("192.168.1.86", "robotenok/auth"),
+        headers: <String, String> {
+          "Content-Type": "application/json; charset=UTF-8"
+        },
+        body: jsonEncode(data.toJson()),
+    );
 
     token = "";
 
-    if ( responce.statusCode == 200 && responce.body.length > 1 ) {
+    if ( response.statusCode == 200 && response.body.length > 1 ) {
 
-      ResponcePack json = ResponcePack.fromJson(jsonDecode(responce.body));
-      token = json.responce["body"].toString();
+      RespString json = RespString.fromJson(jsonDecode(response.body));
+      token = json.response;
 
     }
-
   }
 }

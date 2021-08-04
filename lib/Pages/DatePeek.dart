@@ -118,7 +118,7 @@ class _DatePeekState extends State<DatePeek> {
 
     return GestureDetector(
         onTap: () {
-          Navigator.of(context).push(MaterialPageRoute(builder: (context) => GroupsPage(-1, selectedDay: active_days.elementAt(index).index)));
+          // Navigator.of(context).push(MaterialPageRoute(builder: (context) => GroupsPage(-1, selectedDay: active_days.elementAt(index).index)));
         },
         child: Card(
           child:  Stack (
