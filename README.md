@@ -1,16 +1,22 @@
-# robotenok
+# Robotenok
+<img src="assets/logo.jpg" width="500"/> </br>
 
-Android application for Robotenok by CodedLife
+Android application for "Robotenok" company http://robotcrimea.ru/ by CodedLife</br>
+This app helps teachers with filling in credentials.
 
-## Getting Started
+## Profile page. 
+### You can controll your stats here: </br>
+<img src="preview/profile page.jpg" width="500"/> </br>
+## Groups list. 
+### Here can be stored all groups which pinned to teacher: </br>
+<img src="preview/selecting groups.jpg" width="500"/> </br>
+## Group page. 
+### Group consists of students: </br>
+<img src="preview/group page.jpg" width="500"/> </br>
+## Student page. 
+### It contains his history like payments and visits: </br>
+<img src="preview/student page.jpg" width="500"/> </br>
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 📜Todo:
+ 🔘 Link project with server: https://github.com/deCodedLife/Robotenok-go </br>
+ 🔘 Realize adding costs
