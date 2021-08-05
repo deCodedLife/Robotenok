@@ -1,6 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import 'package:robotenok/globals.dart' as globals;
 
@@ -10,7 +11,6 @@ import 'DataProvider.dart';
 
 import '../DB/Groups.dart';
 import '../DB/Profile.dart';
-import '../DB/Visits.dart';
 
 import '../Pages/Lesson.dart';
 
@@ -23,7 +23,7 @@ class Workers {
   BuildContext context;
 
   void initProfileData() async {
-    profile = localProfile;
+    profile = await Profile().get();
   }
 
   void checkGroups() async {
@@ -32,10 +32,11 @@ class Workers {
     curator.userID = profile.id;
 
     DataPack pack = new DataPack();
-    pack.token = server.authProvider.token;
+    pack.token = provider.token;
     pack.body = curator.toJson();
 
-    RespDynamic response = await server.getData("select-group-curators", pack);
+    var data = await server.getData("select-group-curators", pack.toJson());
+    RespDynamic response = RespDynamic.fromJson(jsonDecode(data.body));
 
     if (response.status != 200) {
       return;
@@ -50,7 +51,9 @@ class Workers {
       searchingGroup.id = group.groupID;
 
       pack.body = searchingGroup.toJson();
-      response = await server.getData("select-groups", pack);
+      data = await server.getData("select-groups", pack.toJson());
+
+      response = RespDynamic.fromJson(jsonDecode(data.body));
 
       if (response.status != 200) {
         continue;
@@ -63,10 +66,10 @@ class Workers {
 
     globals.groups = activeGroups;
 
-    CheckActiveLessons();
+    checkActiveLessons();
   }
 
-  void CheckActiveLessons() {
+  void checkActiveLessons() {
     DateTime currentTime = DateTime.now();
 
     for (Group currentGroup in activeGroups) {
@@ -92,12 +95,11 @@ class Workers {
 
   Workers({this.context}) {
     _dateTime = new DateTime.now();
+
     initProfileData();
-
     provider.initData(profile.login, profile.password);
-    server = new Server(authProvider: provider);
 
-    var future = server.authProvider.getToken();
+    var future = provider.getToken();
 
     future.then((value) {
       profile.token = provider.token;

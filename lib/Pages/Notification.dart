@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 class Notify {
   Text title;
+  bool dismissible;
   Widget child;
   List<Widget> actions;
   BuildContext context;
@@ -9,6 +10,7 @@ class Notify {
   show() {
     showDialog(
         context: context,
+        barrierDismissible: dismissible == null ? true : false,
         builder: (context) => AlertDialog(
           title: title,
           content: child,
@@ -21,6 +23,7 @@ class Notify {
     this.title,
     this.child,
     this.actions,
-    this.context
+    this.context,
+    this.dismissible
   });
 }

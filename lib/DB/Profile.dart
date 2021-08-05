@@ -3,18 +3,6 @@ import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
-
-Profile localProfile = new Profile(
-  id: 1,
-  name: "Григорий Кесимин",
-  login: "CodedLife",
-  password: "\$wnkd.K^^ntD.",
-  profileImage: "",
-  type: "admin",
-  cash: 0
-);
-
-
 class Profile
 {
   int id;
@@ -37,6 +25,11 @@ class Profile
     this.cash,
     this.token
   });
+
+  Future init() async {
+    var db = await initDB();
+    await db.execute("CREATE TABLE IF NOT EXISTS profile (id	INTEGER NOT NULL, name	TEXT NOT NULL, login	TEXT NOT NULL, password	TEXT NOT NULL, image	TEXT NOT NULL, type	TEXT NOT NULL, cash	INTEGER NOT NULL);");
+  }
 
   factory Profile.fromJson(Map<String, dynamic> json) => new Profile(
     id: json["id"],
@@ -70,7 +63,7 @@ class Profile
   Future<Profile> get() async {
     final db = await initDB();
     var data = await db.query("profile");
-    return data.isNotEmpty ? Profile.fromJson(data.first) : Null;
+    return data.isNotEmpty ? Profile.fromJson(data.first) : null;
   }
 
   Future<void> create(Profile profile) async {

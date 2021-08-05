@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import '../globals.dart' as globals;
 
 import 'List.dart';
+import 'Notification.dart';
+import '../DB/Costs.dart';
 
 List<ListTile> events = [
   ListTile(
@@ -35,7 +38,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-
     data = [
       Card(
         child: GestureDetector(
@@ -51,7 +53,7 @@ class _ProfilePageState extends State<ProfilePage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(Icons.account_balance_wallet, size: 32,),
-              Text("19500", style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold),)
+              Text("${globals.profile.cash}", style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold),)
             ],
           ),
         ),
@@ -70,7 +72,12 @@ class _ProfilePageState extends State<ProfilePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.assistant_photo),
-            Text("16",style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold),),
+            Text("${globals.lessons.length}",
+              style: TextStyle(
+                  fontSize: 21,
+                  fontWeight: FontWeight.bold
+              ),
+            ),
           ],
         ),
       ),
@@ -79,7 +86,7 @@ class _ProfilePageState extends State<ProfilePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.notification_important),
-            Text("10", style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold),)
+            Text("0", style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold),)
           ],
         ),
       )
@@ -103,10 +110,27 @@ class _ProfilePageState extends State<ProfilePage> {
             )
           ),
         ),
-        title: Text("Григорий Кесимин", style: TextStyle(color: Colors.black),),
+        title: Text(
+          globals.profile.name,
+          style: TextStyle(color: Colors.black),
+        ),
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              Notify(
+                context: context,
+                title: Text("Временно не работает"),
+                child: Text("Если Вам требуется редактировать данные профиля - обращайтесь к администратору"),
+                actions: [
+                  MaterialButton(
+                    child: Text("Ok"),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  )
+                ]
+              ).show();
+            },
             icon: Icon(Icons.edit, color: Colors.black,),
           )
         ],

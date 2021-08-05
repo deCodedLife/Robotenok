@@ -3,6 +3,7 @@ import 'dart:convert';
 import '../DB/Profile.dart';
 
 import 'DataProvider.dart';
+import 'Server.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:crypto/crypto.dart';
@@ -45,21 +46,12 @@ class AuthProvider
   }
 
   Future<void> getToken () async {
-    var response = await http.post(
-        Uri.http("192.168.1.86", "robotenok/auth"),
-        headers: <String, String> {
-          "Content-Type": "application/json; charset=UTF-8"
-        },
-        body: jsonEncode(data.toJson()),
-    );
-
     token = "";
+    var response = await Server().getData("auth", data.toJson());
 
     if ( response.statusCode == 200 && response.body.length > 1 ) {
-
       RespString json = RespString.fromJson(jsonDecode(response.body));
       token = json.response;
-
     }
   }
 }

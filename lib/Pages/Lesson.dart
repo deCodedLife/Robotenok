@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:robotenok/DB/Students.dart';
 import 'package:robotenok/DB/Visits.dart';
@@ -36,26 +38,30 @@ class _LessonPageState extends State<LessonPage> {
       body: searchStudent.toJson(),
     );
 
-    var future = Server().getData("select-group-students", request);
+    var future = Server().getData("select-group-students", request.toJson());
 
     future.then(
         (response) {
 
-          if (response.status != 200 || response.body == null) {
+          if (response.statusCode != 200 || response.body == null) {
             return;
           }
 
-          for (Map<String, dynamic> item in response.body) {
+          var data = RespDynamic.fromJson(jsonDecode(response.body));
+
+          for (Map<String, dynamic> item in data.body) {
             GroupStudent groupStudent = GroupStudent.fromJson(item);
             request.body = Student(id: groupStudent.studentID).toJson();
-            future = Server().getData("select-students", request);
+            future = Server().getData("select-students", request.toJson());
 
             future.then(
-                (data) {
+                (response) {
 
-                  if (data.status != 200) {
+                  if (response.statusCode != 200) {
                     return;
                   }
+
+                  var data = RespDynamic.fromJson(jsonDecode(response.body));
 
                   for (Map<String, dynamic> item in data.body) {
                     tempStudents.add(Student.fromJson(item));

@@ -15,6 +15,7 @@ dependencies:
   sqflite: any
   http:
   crypto: ^3.0.1
+  intl: ^0.17.0
 
   path:
   path_provider: any

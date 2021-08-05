@@ -1,6 +1,15 @@
+import 'dart:convert';
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:robotenok/API/DataProvider.dart';
+
+import '../DB/Groups.dart';
+import '../API/Server.dart';
+import '../globals.dart' as globals;
+
 import 'Group.dart';
+
 
 class GroupsPage extends StatefulWidget {
   @override
@@ -9,9 +18,94 @@ class GroupsPage extends StatefulWidget {
 
 class _GroupsPageState extends State<GroupsPage> {
   List<int> selectedTiles = [];
+  List<int> selectedWeekdays = [];
 
+  List<Group> groups = [];
+  List<GroupType> groupTypes = [];
 
-  Widget GroupTile(BuildContext context, int index) {
+  List<Group> actualGroups = [];
+
+  bool isMore = false;
+
+  @override
+  initState() {
+    super.initState();
+
+    groups = globals.groups;
+    groupTypes = globals.groupTypes;
+
+    exec();
+  }
+
+  void exec() async {
+    if ( globals.groups.isNotEmpty ) return;
+
+    GroupCurator curator = new GroupCurator();
+    List<GroupCurator> selectedGroups = [];
+    curator.userID = globals.profile.id;
+
+    DataPack pack = new DataPack();
+    pack.token = globals.authProvider.token;
+    pack.body = curator.toJson();
+
+    var data = await Server().getData("select-group-curators", pack.toJson());
+    RespDynamic response = RespDynamic.fromJson(jsonDecode(data.body));
+
+    if (response.status != 200) {
+      return;
+    }
+
+    for (Map<String, dynamic> item in response.body) {
+      selectedGroups.add(new GroupCurator.fromJson(item));
+    }
+
+    for (GroupCurator group in selectedGroups) {
+      Group searchingGroup = new Group();
+      searchingGroup.id = group.groupID;
+
+      pack.body = searchingGroup.toJson();
+      data = await Server().getData("select-groups", pack.toJson());
+
+      response = RespDynamic.fromJson(jsonDecode(data.body));
+
+      if (response.status != 200) {
+        continue;
+      }
+
+      for (Map<String, dynamic> item in response.body) {
+        Group element = Group.fromJson(item);
+        groups.add(element);
+
+        GroupType searchingGroupType = new GroupType();
+        searchingGroupType.id = element.groupType;
+        pack.body = searchingGroupType.toJson();
+
+        data = await Server().getData("select-group-types", pack.toJson());
+        response = RespDynamic.fromJson(jsonDecode(data.body));
+
+        if (response.status != 200) {
+          continue;
+        }
+
+        for (Map<String, dynamic> item in response.body) {
+          GroupType element = GroupType.fromJson(item);
+
+          for (GroupType type in groupTypes) {
+            if ( element.id == type.id ) element = null;
+          }
+
+          if (element != null) groupTypes.add(element);
+        }
+      }
+    }
+
+    globals.groups = groups;
+    globals.groupTypes = groupTypes;
+
+    setState(() {});
+  }
+
+  Widget TileProvider(BuildContext context, int index) {
     bool _isSelected = false;
 
     for (int tile in selectedTiles) {
@@ -19,6 +113,12 @@ class _GroupsPageState extends State<GroupsPage> {
         _isSelected = true;
       }
     }
+
+    return TypeWidget(_isSelected, index, context);
+  }
+
+  Padding TypeWidget(bool _isSelected, int index, BuildContext context) {
+    var currentType = groupTypes.elementAt(index);
 
     return Padding(
       padding: EdgeInsets.all(5),
@@ -35,16 +135,14 @@ class _GroupsPageState extends State<GroupsPage> {
           padding: EdgeInsets.only(left: 5, right: 5),
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: _isSelected ? Theme.of(context).accentColor : Colors.white,
-            borderRadius: BorderRadius.all(Radius.circular(5))
-          ),
+              color: _isSelected ? Theme.of(context).accentColor : Colors.white,
+              borderRadius: BorderRadius.all(Radius.circular(5))),
           child: Text(
-            "Lego Mindstorms",
+            currentType.name,
             style: TextStyle(
-              color: _isSelected ? Colors.white : Colors.black,
-              fontSize: 16,
-              fontWeight: FontWeight.bold
-            ),
+                color: _isSelected ? Colors.white : Colors.black,
+                fontSize: 16,
+                fontWeight: FontWeight.bold),
           ),
         ),
       ),
@@ -52,10 +150,13 @@ class _GroupsPageState extends State<GroupsPage> {
   }
 
   Widget GroupCard(BuildContext context, int index) {
+    var currentGroup = groups.elementAt(index);
+
     return Card(
       child: GestureDetector(
         onTap: () {
-          Navigator.of(context).push(MaterialPageRoute(builder: (context) => GroupPage()));
+          Navigator.of(context)
+              .push(MaterialPageRoute(builder: (context) => GroupPage()));
         },
         child: Stack(
           fit: StackFit.loose,
@@ -68,8 +169,10 @@ class _GroupsPageState extends State<GroupsPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Name(),
-                  Payment()
+                  Name(
+                    weekday: currentGroup.weekday,
+                    start: currentGroup.time,
+                  )
                 ],
               ),
             )
@@ -77,6 +180,87 @@ class _GroupsPageState extends State<GroupsPage> {
         ),
       ),
     );
+  }
+
+  Widget Search() {
+    return ConstrainedBox(
+      constraints:
+          const BoxConstraints(minWidth: double.infinity, maxHeight: 64),
+      child: ListView.builder(
+        padding: EdgeInsets.all(5),
+        scrollDirection: Axis.horizontal,
+        itemCount: groupTypes.length,
+        itemBuilder: (context, index) => TileProvider(context, index),
+      ),
+    );
+  }
+
+  Widget WeekdaysProvider(BuildContext context, int index) {
+    bool _isSelected = false;
+
+    for (int day in selectedWeekdays) {
+      if (index == day) {
+        _isSelected = true;
+      }
+    }
+
+    return WeekDays(_isSelected, index, context);
+  }
+
+  Widget WeekDays(bool _isSelected, int index, BuildContext context) {
+    
+    String day;
+
+    if (index == 0) day = "Пн";
+    if (index == 1) day = "Вт";
+    if (index == 2) day = "Ср";
+    if (index == 3) day = "Чт";
+    if (index == 4) day = "Пт";
+    if (index == 5) day = "Сб";
+    if (index == 6) day = "Вс";
+    
+    return Padding(
+      padding: EdgeInsets.all(5),
+      child: GestureDetector(
+        onTap: () {
+          if (_isSelected) {
+            selectedWeekdays.remove(index);
+          } else {
+            selectedWeekdays.add(index);
+          }
+          setState(() {});
+        },
+        child: Container(
+          padding: EdgeInsets.only(left: 12, right: 12),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+              color: _isSelected ? Theme.of(context).accentColor : Colors.white,
+              borderRadius: BorderRadius.all(Radius.circular(5))),
+          child: Text(
+            day,
+            style: TextStyle(
+                color: _isSelected ? Colors.white : Colors.black,
+                fontSize: 16,
+                fontWeight: FontWeight.bold),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget Addons() {
+    return isMore
+        ? ConstrainedBox(
+            constraints:
+                const BoxConstraints(minWidth: double.infinity, maxHeight: 64),
+            child: ListView.builder(
+              padding: EdgeInsets.all(5),
+              scrollDirection: Axis.horizontal,
+              itemCount: 7,
+              itemBuilder: (context, index) => WeekdaysProvider(context, index),
+            ),
+          )
+        : Container();
   }
 
   @override
@@ -88,31 +272,26 @@ class _GroupsPageState extends State<GroupsPage> {
         centerTitle: true,
         title: Text(
           "Группы",
-          style: TextStyle(
-              color: Colors.black
-          ),
+          style: TextStyle(color: Colors.black),
         ),
         actions: [
           IconButton(
-            onPressed: () {},
-            icon: Icon(Icons.add, color: Colors.black),
+            onPressed: () {
+              setState(() {
+                isMore = !isMore;
+              });
+            },
+            icon: Icon(Icons.more_vert, color: Colors.black),
           )
         ],
       ),
       body: Column(
         children: [
-          ConstrainedBox(
-            constraints: const BoxConstraints(minWidth: double.infinity, maxHeight: 64),
-            child: ListView.builder(
-              padding: EdgeInsets.all(5),
-              scrollDirection: Axis.horizontal,
-              itemCount: 5,
-              itemBuilder: (context, index) => GroupTile(context, index),
-            ),
-          ),
+          Search(),
+          Addons(),
           Expanded(
             child: ListView.builder(
-              itemCount: 5,
+              itemCount: groups.length,
               padding: EdgeInsets.all(10),
               itemBuilder: (context, index) => GroupCard(context, index),
             ),
@@ -128,26 +307,48 @@ class _GroupsPageState extends State<GroupsPage> {
 }
 
 class Name extends StatelessWidget {
+  final int weekday;
+  final String start;
+
   const Name({
     Key key,
+    this.weekday,
+    this.start
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    String day;
+
+    if (weekday == -1) day = "Ежедневно";
+    if (weekday == 1) day = "Понедельник";
+    if (weekday == 2) day = "Вторник";
+    if (weekday == 3) day = "Среда";
+    if (weekday == 4) day = "Четверг";
+    if (weekday == 5) day = "Пятница";
+    if (weekday == 6) day = "Суббота";
+    if (weekday == 7) day = "Воскресенье";
+
+    String parseTime = DateTime.now().toUtc().toString();
+    var parts = parseTime.split(" ");
+    parseTime = parts[0] + " " + start + ".000Z";
+
+    var groupDate = DateTime.parse(parseTime);
+
     return Text(
-        "Суббота 10:00",
-        style: TextStyle(
-          fontSize: 26,
-          color: Colors.white,
-          fontWeight: FontWeight.bold
-        ),
+      "$day ${DateFormat.Hms().format(groupDate)}",
+      style: TextStyle(
+          fontSize: 26, color: Colors.white, fontWeight: FontWeight.bold),
     );
   }
 }
 
 class Payment extends StatelessWidget {
+  final int payment;
+
   const Payment({
     Key key,
+    this.payment
   }) : super(key: key);
 
   @override
@@ -160,12 +361,9 @@ class Payment extends StatelessWidget {
           color: Colors.white,
         ),
         Text(
-          "2800",
+          "$payment",
           style: TextStyle(
-              fontSize: 20,
-              color: Colors.white,
-              fontWeight: FontWeight.bold
-          ),
+              fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ],
     );
@@ -187,9 +385,7 @@ class BackgroundImage extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         image: DecorationImage(
-            image: AssetImage("assets/bg_wedo.jpg"),
-            fit: BoxFit.fitWidth
-        ),
+            image: AssetImage("assets/bg_wedo.jpg"), fit: BoxFit.fitWidth),
       ),
     );
   }

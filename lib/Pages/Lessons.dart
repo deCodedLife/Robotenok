@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 import '../globals.dart' as globals;
@@ -27,14 +29,16 @@ class _LessonsState extends State<Lessons> {
         body: searchLessons.toJson(),
     );
     
-    var future = Server().getData("select-classes", request);
+    var future = Server().getData("select-classes", request.toJson());
 
     future.then((response) {
-      if (response.status != 200) {
+      if (response.statusCode != 200) {
         return;
       }
 
-      for (Map<String, dynamic> item in response.body) {
+      var data = RespDynamic.fromJson(jsonDecode(response.body));
+
+      for (Map<String, dynamic> item in data.body) {
         tempLessons.add(Lesson.fromJson(item));
       }
 
