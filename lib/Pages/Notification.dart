@@ -7,6 +7,17 @@ class Notify {
   List<Widget> actions;
   BuildContext context;
 
+  newUser() {
+    showDialog(
+        context: context,
+        barrierDismissible: dismissible == null ? true : false,
+        builder: (context) => SimpleDialog(
+          title: title,
+          children: actions,
+        )
+    );
+  }
+
   show() {
     showDialog(
         context: context,

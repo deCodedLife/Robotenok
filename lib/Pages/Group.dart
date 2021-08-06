@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+
+import 'Notification.dart';
 import 'Student.dart';
+import 'Camera.dart';
 
 class GroupPage extends StatefulWidget {
   @override
@@ -100,7 +103,50 @@ class _GroupPageState extends State<GroupPage> {
         centerTitle: true,
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          Notify(
+            context: context,
+            title: Text("Новый студент"),
+            actions: [
+              Padding(
+                padding: EdgeInsets.all(5),
+                child: TextField(
+                  decoration: InputDecoration(
+                      hintText: "ФИО"
+                  ),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.all(5),
+                child: TextField(
+                  decoration: InputDecoration(
+                      hintText: "Возраст"
+                  ),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.all(5),
+                child: TextField(
+                  decoration: InputDecoration(
+                      hintText: "Номер"
+                  ),
+                ),
+              ),
+              Align(
+                alignment: Alignment.center,
+                child: IconButton(
+                  icon: Icon(Icons.camera_alt),
+                  color: Theme.of(context).accentColor,
+                  onPressed: () {
+                    Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) => TakePictureScreen())
+                    );
+                  },
+                ),
+              )
+            ]
+          ).show();
+        },
         child: Icon(Icons.add),
       ),
       body: Column(

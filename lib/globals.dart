@@ -1,7 +1,8 @@
 library robotenok.globals;
 
-import 'package:robotenok/DB/Groups.dart';
+import 'package:camera/camera.dart';
 
+import 'DB/Groups.dart';
 import 'DB/Lessons.dart';
 import 'DB/Profile.dart';
 
@@ -14,3 +15,5 @@ List<GroupType> groupTypes = [];
 
 AuthProvider authProvider = new AuthProvider();
 Profile profile = new Profile();
+
+CameraDescription camera = new CameraDescription();

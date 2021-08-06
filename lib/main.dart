@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:camera/camera.dart';
 import 'globals.dart' as globals;
 
 import 'DB/Profile.dart';
@@ -11,6 +12,9 @@ import 'Pages/Notification.dart';
 
 main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  final cameras = await availableCameras();
+  globals.camera = cameras.first;
 
   await Profile().init();
   globals.profile = await Profile().get();

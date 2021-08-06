@@ -48,7 +48,7 @@ class _GroupsPageState extends State<GroupsPage> {
     pack.token = globals.authProvider.token;
     pack.body = curator.toJson();
 
-    var data = await Server().getData("select-group-curators", pack.toJson());
+    var data = await Server().getData("group-curators", pack.toJson());
     RespDynamic response = RespDynamic.fromJson(jsonDecode(data.body));
 
     if (response.status != 200) {
@@ -64,7 +64,7 @@ class _GroupsPageState extends State<GroupsPage> {
       searchingGroup.id = group.groupID;
 
       pack.body = searchingGroup.toJson();
-      data = await Server().getData("select-groups", pack.toJson());
+      data = await Server().getData("groups", pack.toJson());
 
       response = RespDynamic.fromJson(jsonDecode(data.body));
 
@@ -80,7 +80,7 @@ class _GroupsPageState extends State<GroupsPage> {
         searchingGroupType.id = element.groupType;
         pack.body = searchingGroupType.toJson();
 
-        data = await Server().getData("select-group-types", pack.toJson());
+        data = await Server().getData("group-types", pack.toJson());
         response = RespDynamic.fromJson(jsonDecode(data.body));
 
         if (response.status != 200) {
