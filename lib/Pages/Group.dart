@@ -12,6 +12,7 @@ import 'Camera.dart';
 import '../API/Server.dart';
 import '../API/DataProvider.dart';
 
+import "../DB/Image.dart";
 import '../DB/Students.dart';
 import '../DB/Groups.dart';
 
@@ -31,6 +32,7 @@ class _GroupPageState extends State<GroupPage> {
   String searchBy;
 
   List<Student> students = [];
+  List<ImageData> studentImages = [];
 
   @override
   initState() {
@@ -93,17 +95,39 @@ class _GroupPageState extends State<GroupPage> {
         students.add( Student.fromJson( item ) );
       }
 
+      if ( students.last.image == 0 ) continue;
+
+      ImageData searchingImage = new ImageData(
+          id: students.last.image
+      );
+
+      request.body = searchingImage.toJson();
+      response = await Server().getData("images", request.toJson());
+
+      if ( response.statusCode != 200 ) {
+        studentImages.add( new ImageData(id: -1) );
+        continue;
+      }
+
+      data = RespDynamic.fromJson( jsonDecode( response.body ) );
+
+      if ( data.status != 200 ) {
+        studentImages.add( new ImageData(id: -1) );
+        continue;
+      }
+
+      for ( Map<String, dynamic> image in data.body ) {
+        studentImages.add( ImageData.fromJson(image) );
+      }
+
     }
 
     setState(() {});
   }
 
-  ImageProvider StudentImage(Student student) {
-    return student.image != "" ? NetworkImage(student.image) : AssetImage("logo.jpg");
-  }
-
   Widget studentCard(BuildContext context, int index) {
     var currentStudent = students.elementAt(index);
+    var currentImage = studentImages.elementAt(index);
 
     return Card(
       elevation: 1,
@@ -124,7 +148,9 @@ class _GroupPageState extends State<GroupPage> {
                   decoration: BoxDecoration(
                       image: DecorationImage(
                         alignment: Alignment.topCenter,
-                        image: StudentImage(currentStudent),
+                        image: currentImage.id == -1 ?
+                        AssetImage("logo.jpg") :
+                        NetworkImage( Server().serverUri + "/images/" + currentImage.filename ),
                         fit: BoxFit.fitWidth,
                       ),
                       borderRadius: BorderRadius.all(Radius.circular(5))

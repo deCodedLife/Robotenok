@@ -11,7 +11,7 @@ class Student
   String parents;
   int sex;
   int active;
-  String image;
+  int image;
 
   Student ({
     this.id,
