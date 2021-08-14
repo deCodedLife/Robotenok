@@ -26,7 +26,7 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  List<Card> data = [];
+  List<Widget> data = [];
 
   Widget stats(BuildContext context, int index) {
     return data.elementAt(index);
@@ -39,16 +39,16 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     data = [
-      Card(
-        child: GestureDetector(
-          onTap: () {
-            Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => ListPage(
-                  title: Text("Доходы", style: TextStyle(color: Colors.black)),
-                  tiles: MoneyTiles,
-                )
-            ));
-          },
+      GestureDetector(
+        onTap: () {
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => ListPage(
+                title: Text("Доходы", style: TextStyle(color: Colors.black)),
+                tiles: MoneyTiles,
+              )
+          ));
+        },
+        child: Card(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -58,36 +58,51 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
       ),
-      Card(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.monetization_on, size: 32),
-            Text("1550", style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold),)
-          ],
+      GestureDetector(
+        onTap: () {
+
+        },
+        child: Card(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.monetization_on, size: 32),
+              Text("1550", style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold),)
+            ],
+          ),
         ),
       ),
-      Card(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.assistant_photo),
-            Text("${globals.lessons.length}",
-              style: TextStyle(
-                  fontSize: 21,
-                  fontWeight: FontWeight.bold
+      GestureDetector(
+        onTap: () {
+
+        },
+        child: Card(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.assistant_photo),
+              Text("${globals.lessons.length}",
+                style: TextStyle(
+                    fontSize: 21,
+                    fontWeight: FontWeight.bold
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-      Card(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.notification_important),
-            Text("0", style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold),)
-          ],
+      GestureDetector(
+        onTap: () {
+
+        },
+        child: Card(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.notification_important),
+              Text("0", style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold),)
+            ],
+          ),
         ),
       )
     ];

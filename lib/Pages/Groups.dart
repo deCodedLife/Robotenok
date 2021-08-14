@@ -156,7 +156,7 @@ class _GroupsPageState extends State<GroupsPage> {
       child: GestureDetector(
         onTap: () {
           Navigator.of(context)
-              .push(MaterialPageRoute(builder: (context) => GroupPage()));
+              .push(MaterialPageRoute(builder: (context) => GroupPage(currentGroup: currentGroup,)));
         },
         child: Stack(
           fit: StackFit.loose,

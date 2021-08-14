@@ -1,17 +1,110 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+
+import '../globals.dart' as globals;
 
 import 'Notification.dart';
 import 'Student.dart';
 import 'Camera.dart';
 
+import '../API/Server.dart';
+import '../API/DataProvider.dart';
+
+import '../DB/Students.dart';
+import '../DB/Groups.dart';
+
 class GroupPage extends StatefulWidget {
+  final Group currentGroup;
+
+  GroupPage({
+    this.currentGroup
+  });
+
   @override
   _GroupPageState createState() => _GroupPageState();
 }
 
 class _GroupPageState extends State<GroupPage> {
+
+  String searchBy;
+
+  List<Student> students = [];
+
+  @override
+  initState() {
+    super.initState();
+    init();
+  }
+
+  void init () async {
+    List<GroupStudent> groupStudents = [];
+
+    GroupStudent searchingStudents = new GroupStudent(
+        groupID: widget.currentGroup.id
+    );
+
+    DataPack request = new DataPack(
+        token: globals.authProvider.token,
+        body: searchingStudents.toJson()
+    );
+
+    var response = await Server().getData("group-students", request.toJson());
+
+    if ( response.statusCode != 200 ) {
+      Notifications(context: context).serverError();
+      return;
+    }
+
+    RespDynamic data = RespDynamic.fromJson(jsonDecode(response.body));
+
+    if ( data.status != 200 ) {
+      Notifications(context: context).customError(data.body.toString());
+      return;
+    }
+
+    for ( Map<String, dynamic> student in data.body ) {
+      groupStudents.add( GroupStudent.fromJson( student ) );
+    }
+
+    for ( GroupStudent student in groupStudents ) {
+      Student requestedStudent = new Student(
+          id: student.id
+      );
+      request.body = requestedStudent.toJson();
+
+      response = await Server().getData("students", request.toJson());
+
+      if ( response.statusCode != 200 ) {
+        Notifications(context: context).serverError();
+        return;
+      }
+
+      data = RespDynamic.fromJson( jsonDecode( response.body ) );
+
+      if ( data.status != 200 ) {
+        Notifications(context: context).customError(data.body.toString());
+      }
+
+      print(data.body);
+
+      for ( Map<String, dynamic> item in data.body ) {
+        students.add( Student.fromJson( item ) );
+      }
+
+    }
+
+    setState(() {});
+  }
+
+  ImageProvider StudentImage(Student student) {
+    return student.image != "" ? NetworkImage(student.image) : AssetImage("logo.jpg");
+  }
+
   Widget studentCard(BuildContext context, int index) {
+    var currentStudent = students.elementAt(index);
+
     return Card(
       elevation: 1,
       child: GestureDetector(
@@ -31,9 +124,7 @@ class _GroupPageState extends State<GroupPage> {
                   decoration: BoxDecoration(
                       image: DecorationImage(
                         alignment: Alignment.topCenter,
-                        image: AssetImage(
-                            "assets/profile.jpg"
-                        ),
+                        image: StudentImage(currentStudent),
                         fit: BoxFit.fitWidth,
                       ),
                       borderRadius: BorderRadius.all(Radius.circular(5))
@@ -46,7 +137,7 @@ class _GroupPageState extends State<GroupPage> {
                     children: [
                       Icon(Icons.person, size: 18),
                       Text(
-                        "Лавров Валерий",
+                        currentStudent.name,
                         style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold
@@ -69,7 +160,7 @@ class _GroupPageState extends State<GroupPage> {
                     children: [
                       Icon(Icons.phone, size: 18),
                       Text(
-                        "8-978-039-87-97",
+                        currentStudent.phone,
                         style: TextStyle(
                           fontSize: 14,
                         ),
@@ -170,7 +261,7 @@ class _GroupPageState extends State<GroupPage> {
           ),
           Expanded(
             child: GridView.builder(
-              itemCount: 6,
+              itemCount: students.length,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:  2, childAspectRatio: 0.75),
               padding: EdgeInsets.only(left: 15, right: 15),
               itemBuilder: (context, index) => studentCard(context, index),

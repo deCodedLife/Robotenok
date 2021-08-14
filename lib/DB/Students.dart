@@ -11,6 +11,7 @@ class Student
   String parents;
   int sex;
   int active;
+  String image;
 
   Student ({
     this.id,
@@ -18,7 +19,8 @@ class Student
     this.phone,
     this.parents,
     this.sex,
-    this.active
+    this.active,
+    this.image
   });
 
   factory Student.fromJson(Map<String, dynamic> json) => new Student(
@@ -27,7 +29,8 @@ class Student
     phone: json["phone"],
     parents: json["parents"],
     sex: json["sex"],
-    active: json["active"]
+    active: json["active"],
+    image: json["image"]
   );
 
   Map<String, dynamic> toJson() => {
@@ -36,7 +39,8 @@ class Student
     "phone": phone,
     "parents": parents,
     "sex": sex,
-    "active": active
+    "active": active,
+    "image": image
   };
 
   Map<String, dynamic> export() => {
