@@ -5,6 +5,9 @@ import 'List.dart';
 import 'Notification.dart';
 import '../DB/Costs.dart';
 
+import '../DB/Image.dart';
+import '../DB/Students.dart';
+
 List<ListTile> events = [
   ListTile(
     minVerticalPadding: 10,

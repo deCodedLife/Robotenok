@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:robotenok/API/Server.dart';
+
+import '../DB/Image.dart';
+import '../DB/Students.dart';
 
 class StudentPage extends StatefulWidget {
   @override
@@ -19,6 +23,15 @@ List<ListTile> students = [
 class _StudentPageState extends State<StudentPage> {
   Widget studentTile(BuildContext context, int index) {
     return students.elementAt(index);
+  }
+
+  Student currentStudent = Student();
+  ImageData userImage = ImageData();
+
+  Widget studentImage() {
+    return userImage.id != -1 ?
+      Image.network( Server().serverUri + "/robotenok/images/" + userImage.filename ) :
+      Image.asset( "assets/logo.jpg" );
   }
 
   @override
@@ -61,9 +74,9 @@ class _StudentPageState extends State<StudentPage> {
                           children: [
                             Row(
                               children: [
-                                Icon(Icons.person, size: 24),
+                                // Icon(Icons.person, size: 24),
                                 Text(
-                                  "Лавров Валерий",
+                                  currentStudent.name,
                                   style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold
@@ -86,7 +99,7 @@ class _StudentPageState extends State<StudentPage> {
                               children: [
                                 Icon(Icons.phone, size: 24),
                                 Text(
-                                  "8-978-039-87-97",
+                                  currentStudent.phone,
                                   style: TextStyle(
                                     fontSize: 16,
                                   ),
@@ -97,10 +110,7 @@ class _StudentPageState extends State<StudentPage> {
                         ),
                       ),
                     ),
-                    Image.asset(
-                      "assets/profile.jpg",
-                      fit: BoxFit.fitHeight,
-                    ),
+                    studentImage();
                   ],
                 ),
               ),

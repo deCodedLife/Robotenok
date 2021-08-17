@@ -95,29 +95,31 @@ class _GroupPageState extends State<GroupPage> {
         students.add( Student.fromJson( item ) );
       }
 
-      if ( students.last.image == 0 ) continue;
+      if ( students.last.image != 0 ) {
+        ImageData searchingImage = new ImageData(
+            id: students.last.image
+        );
 
-      ImageData searchingImage = new ImageData(
-          id: students.last.image
-      );
+        request.body = searchingImage.toJson();
+        response = await Server().getData("images", request.toJson());
 
-      request.body = searchingImage.toJson();
-      response = await Server().getData("images", request.toJson());
+        if ( response.statusCode != 200 ) {
+          studentImages.add( new ImageData(id: -1) );
+          continue;
+        }
 
-      if ( response.statusCode != 200 ) {
+        data = RespDynamic.fromJson( jsonDecode( response.body ) );
+
+        if ( data.status != 200 ) {
+          studentImages.add( new ImageData(id: -1) );
+          continue;
+        }
+
+        for ( Map<String, dynamic> image in data.body ) {
+          studentImages.add( ImageData.fromJson(image) );
+        }
+      } else {
         studentImages.add( new ImageData(id: -1) );
-        continue;
-      }
-
-      data = RespDynamic.fromJson( jsonDecode( response.body ) );
-
-      if ( data.status != 200 ) {
-        studentImages.add( new ImageData(id: -1) );
-        continue;
-      }
-
-      for ( Map<String, dynamic> image in data.body ) {
-        studentImages.add( ImageData.fromJson(image) );
       }
 
     }
@@ -149,8 +151,8 @@ class _GroupPageState extends State<GroupPage> {
                       image: DecorationImage(
                         alignment: Alignment.topCenter,
                         image: currentImage.id == -1 ?
-                        AssetImage("logo.jpg") :
-                        NetworkImage( Server().serverUri + "/images/" + currentImage.filename ),
+                        AssetImage("assets/logo.jpg") :
+                        NetworkImage("http://" + Server().serverUri + "/robotenok/images/" + currentImage.filename),
                         fit: BoxFit.fitWidth,
                       ),
                       borderRadius: BorderRadius.all(Radius.circular(5))
