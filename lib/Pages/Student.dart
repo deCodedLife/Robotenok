@@ -5,6 +5,14 @@ import '../DB/Image.dart';
 import '../DB/Students.dart';
 
 class StudentPage extends StatefulWidget {
+  Student currentStudent = Student();
+  ImageData userImage = ImageData();
+
+  StudentPage({
+    this.currentStudent,
+    this.userImage
+  });
+
   @override
   _StudentPageState createState() => _StudentPageState();
 }
@@ -21,16 +29,15 @@ List<ListTile> students = [
 ];
 
 class _StudentPageState extends State<StudentPage> {
+
   Widget studentTile(BuildContext context, int index) {
     return students.elementAt(index);
   }
 
-  Student currentStudent = Student();
-  ImageData userImage = ImageData();
 
   Widget studentImage() {
-    return userImage.id != -1 ?
-      Image.network( Server().serverUri + "/robotenok/images/" + userImage.filename ) :
+    return widget.userImage.id != -1 ?
+      Image.network( "http://" + Server().serverUri + "/robotenok/images/" + widget.userImage.filename, fit: BoxFit.cover,) :
       Image.asset( "assets/logo.jpg" );
   }
 
@@ -67,6 +74,7 @@ class _StudentPageState extends State<StudentPage> {
                   children: [
                     // SizedBox(width: 10),
                     Expanded(
+                      flex: 3,
                       child: Padding(
                         padding: EdgeInsets.all(10),
                         child: Column(
@@ -76,7 +84,7 @@ class _StudentPageState extends State<StudentPage> {
                               children: [
                                 // Icon(Icons.person, size: 24),
                                 Text(
-                                  currentStudent.name,
+                                  widget.currentStudent.name,
                                   style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold
@@ -99,7 +107,7 @@ class _StudentPageState extends State<StudentPage> {
                               children: [
                                 Icon(Icons.phone, size: 24),
                                 Text(
-                                  currentStudent.phone,
+                                  widget.currentStudent.phone,
                                   style: TextStyle(
                                     fontSize: 16,
                                   ),
@@ -110,7 +118,10 @@ class _StudentPageState extends State<StudentPage> {
                         ),
                       ),
                     ),
-                    studentImage();
+                    Expanded(
+                        flex: 2,
+                        child: studentImage()
+                    )
                   ],
                 ),
               ),

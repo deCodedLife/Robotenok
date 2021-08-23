@@ -30,9 +30,47 @@ class GroupPage extends StatefulWidget {
 class _GroupPageState extends State<GroupPage> {
 
   String searchBy;
+  Student newStudent = Student(
+    age: "Дата рождения"
+  );
+  DateTime selectedDate;
 
   List<Student> students = [];
   List<ImageData> studentImages = [];
+
+  DateTime currentDate = DateTime.now();
+
+  reverseDate(String date) {
+    var parts = date.split(" ");
+    date = parts[0];
+
+    parts = date.split("-");
+
+    if (parts.length < 2) {
+      return "";
+    }
+
+    date = parts[2] + "-" + parts[1] + "-" + parts[0];
+
+    return date;
+  }
+
+  Future<void> selectDate(BuildContext context) async {
+    final DateTime pickedDate = await showDatePicker(
+        context: context,
+        initialDate: selectedDate != null ? selectedDate : currentDate.subtract(Duration(days:  365 * 4)),
+        firstDate: DateTime.now().subtract(Duration(days: 365 * 16)),
+        lastDate: DateTime.now().subtract(Duration(days:  365 * 4))
+    );
+
+    if ( pickedDate != null ) {
+      setState(() {
+        print(pickedDate);
+        selectedDate = pickedDate;
+        newStudent.age = reverseDate(pickedDate.toString());
+      });
+    }
+  }
 
   @override
   initState() {
@@ -135,7 +173,10 @@ class _GroupPageState extends State<GroupPage> {
       elevation: 1,
       child: GestureDetector(
         onTap: () {
-          Navigator.of(context).push(MaterialPageRoute(builder: (context) => StudentPage()));
+          Navigator.of(context).push(MaterialPageRoute(builder: (context) => StudentPage(
+            currentStudent: currentStudent,
+            userImage: currentImage,
+          )));
         },
         child: Padding(
           padding: EdgeInsets.all(5),
@@ -223,48 +264,113 @@ class _GroupPageState extends State<GroupPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Notify(
+
+          showDialog(
             context: context,
-            title: Text("Новый студент"),
-            actions: [
-              Padding(
-                padding: EdgeInsets.all(5),
-                child: TextField(
-                  decoration: InputDecoration(
-                      hintText: "ФИО"
-                  ),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.all(5),
-                child: TextField(
-                  decoration: InputDecoration(
-                      hintText: "Возраст"
-                  ),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.all(5),
-                child: TextField(
-                  decoration: InputDecoration(
-                      hintText: "Номер"
-                  ),
-                ),
-              ),
-              Align(
-                alignment: Alignment.center,
-                child: IconButton(
-                  icon: Icon(Icons.camera_alt),
-                  color: Theme.of(context).accentColor,
-                  onPressed: () {
-                    Navigator.of(context).push(
-                        MaterialPageRoute(builder: (context) => TakePictureScreen())
-                    );
-                  },
-                ),
-              )
-            ]
-          ).show();
+            builder: (context) {
+              String date;
+              bool nameValidation = false;
+              bool phoneValidation = false;
+
+              var nameTextController = TextEditingController();
+              var phoneTextController = TextEditingController();
+
+              nameTextController.text = newStudent.name != null ? newStudent.name : "";
+              phoneTextController.text = newStudent.phone != null ? newStudent.phone : "";
+
+              return StatefulBuilder(
+                builder: (context, setState) {
+                  return AlertDialog(
+                    title: Text("Новый ученик"),
+                    actions: [
+                      Padding(
+                        padding: EdgeInsets.all(5),
+                        child: TextField(
+                          controller: nameTextController,
+                          decoration: InputDecoration(
+                            icon: Icon(Icons.person_add),
+                            labelText: "Имя",
+                            errorText: nameValidation ? "Введите имя" : null
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.all(5),
+                        child: TextField(
+                          controller: phoneTextController,
+                          keyboardType: TextInputType.phone,
+                          decoration: InputDecoration(
+                              icon: Icon(Icons.phone),
+                              hintText: "Номер",
+                            errorText: phoneValidation ? "Введите номер" : null
+                          ),
+                        ),
+                      ),
+                      Padding(
+                          padding: EdgeInsets.all(5),
+                          child:  OutlinedButton(
+                            onPressed: () async {
+                              await selectDate(context);
+                              setState(() {});
+                            },
+                            child: IntrinsicWidth(
+                              stepWidth: MediaQuery.of(context).size.width,
+                              child: Center(
+                                child: Text(
+                                    newStudent.age
+                                ),
+                              ),
+                            ),
+                          ),
+                      ),
+                      Align(
+                        alignment: Alignment.center,
+                        child: IconButton(
+                          icon: Icon(Icons.camera_alt),
+                          color: Theme.of(context).accentColor,
+                          onPressed: () {
+                            setState(() {
+                              nameValidation = nameTextController.text.isEmpty ? true : false;
+                              phoneValidation = phoneTextController.text.isEmpty ? true : false;
+                            });
+
+                            if ( nameValidation || phoneValidation ) return;
+
+                            newStudent.name = nameTextController.text;
+                            newStudent.phone = phoneTextController.text;
+
+                            if ( selectedDate == null ) {
+
+                              Notify(
+                                context: context,
+                                title: Text("Ошибка"),
+                                child: Text("Введите дату"),
+                                actions: [
+                                  MaterialButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: Text("Ок"),
+                                  )
+                                ]
+                              ).show();
+
+                              return;
+
+                            }
+
+                            Navigator.of(context).push(
+                                MaterialPageRoute(builder: (context) => TakePictureScreen())
+                            );
+                          },
+                        ),
+                      )
+                    ],
+                  );
+                },
+              );
+            }
+          );
         },
         child: Icon(Icons.add),
       ),

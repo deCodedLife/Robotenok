@@ -7,6 +7,7 @@ class Student
 {
   int id;
   String name;
+  String age;
   String phone;
   String parents;
   int sex;
@@ -16,6 +17,7 @@ class Student
   Student ({
     this.id,
     this.name,
+    this.age,
     this.phone,
     this.parents,
     this.sex,
@@ -26,6 +28,7 @@ class Student
   factory Student.fromJson(Map<String, dynamic> json) => new Student(
     id: json["id"],
     name: json["name"],
+    age: json["age"],
     phone: json["phone"],
     parents: json["parents"],
     sex: json["sex"],
@@ -36,6 +39,7 @@ class Student
   Map<String, dynamic> toJson() => {
     "id": id,
     "name": name,
+    "age": age,
     "phone": phone,
     "parents": parents,
     "sex": sex,
