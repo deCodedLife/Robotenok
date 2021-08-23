@@ -67,7 +67,7 @@ class _LessonsState extends State<Lessons> {
     return ListTile(
       tileColor: Colors.lightBlue,
       title: Text(
-        currentGroup.name,
+        "",
         style: Theme.of(context).textTheme.headline5,
       ),
       subtitle: Text(

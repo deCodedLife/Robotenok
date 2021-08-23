@@ -1,13 +1,18 @@
+import 'dart:async';
+import 'dart:ui' as ui;
+import 'package:flutter/services.dart';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 import '../globals.dart' as globals;
 
 import 'Notification.dart';
 import 'Student.dart';
 import 'Camera.dart';
+import 'NewStudent.dart';
 
 import '../API/Server.dart';
 import '../API/DataProvider.dart';
@@ -30,15 +35,9 @@ class GroupPage extends StatefulWidget {
 class _GroupPageState extends State<GroupPage> {
 
   String searchBy;
-  Student newStudent = Student(
-    age: "Дата рождения"
-  );
-  DateTime selectedDate;
 
   List<Student> students = [];
   List<ImageData> studentImages = [];
-
-  DateTime currentDate = DateTime.now();
 
   reverseDate(String date) {
     var parts = date.split(" ");
@@ -53,23 +52,6 @@ class _GroupPageState extends State<GroupPage> {
     date = parts[2] + "-" + parts[1] + "-" + parts[0];
 
     return date;
-  }
-
-  Future<void> selectDate(BuildContext context) async {
-    final DateTime pickedDate = await showDatePicker(
-        context: context,
-        initialDate: selectedDate != null ? selectedDate : currentDate.subtract(Duration(days:  365 * 4)),
-        firstDate: DateTime.now().subtract(Duration(days: 365 * 16)),
-        lastDate: DateTime.now().subtract(Duration(days:  365 * 4))
-    );
-
-    if ( pickedDate != null ) {
-      setState(() {
-        print(pickedDate);
-        selectedDate = pickedDate;
-        newStudent.age = reverseDate(pickedDate.toString());
-      });
-    }
   }
 
   @override
@@ -263,113 +245,42 @@ class _GroupPageState extends State<GroupPage> {
         centerTitle: true,
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
+        onPressed: () async {
+          Device device = Device();
+          var request = DataPack(
+            token: globals.authProvider.token,
+            body: Device().toJson(),
+          );
+          var data = await Server().getData("addDevice", request.toJson());
+
+          if ( data.statusCode != 200 ) {
+            data.body != null
+                ? Notifications(context: context).customError(data.body)
+                : Notifications(context: context).serverError();
+          }
+
+          SingleResp response = SingleResp.fromJson( jsonDecode(data.body) );
+          device = Device.fromJson( response.body );
 
           showDialog(
             context: context,
-            builder: (context) {
-              String date;
-              bool nameValidation = false;
-              bool phoneValidation = false;
-
-              var nameTextController = TextEditingController();
-              var phoneTextController = TextEditingController();
-
-              nameTextController.text = newStudent.name != null ? newStudent.name : "";
-              phoneTextController.text = newStudent.phone != null ? newStudent.phone : "";
-
-              return StatefulBuilder(
-                builder: (context, setState) {
-                  return AlertDialog(
-                    title: Text("Новый ученик"),
-                    actions: [
-                      Padding(
-                        padding: EdgeInsets.all(5),
-                        child: TextField(
-                          controller: nameTextController,
-                          decoration: InputDecoration(
-                            icon: Icon(Icons.person_add),
-                            labelText: "Имя",
-                            errorText: nameValidation ? "Введите имя" : null
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.all(5),
-                        child: TextField(
-                          controller: phoneTextController,
-                          keyboardType: TextInputType.phone,
-                          decoration: InputDecoration(
-                              icon: Icon(Icons.phone),
-                              hintText: "Номер",
-                            errorText: phoneValidation ? "Введите номер" : null
-                          ),
-                        ),
-                      ),
-                      Padding(
-                          padding: EdgeInsets.all(5),
-                          child:  OutlinedButton(
-                            onPressed: () async {
-                              await selectDate(context);
-                              setState(() {});
-                            },
-                            child: IntrinsicWidth(
-                              stepWidth: MediaQuery.of(context).size.width,
-                              child: Center(
-                                child: Text(
-                                    newStudent.age
-                                ),
-                              ),
-                            ),
-                          ),
-                      ),
-                      Align(
-                        alignment: Alignment.center,
-                        child: IconButton(
-                          icon: Icon(Icons.camera_alt),
-                          color: Theme.of(context).accentColor,
-                          onPressed: () {
-                            setState(() {
-                              nameValidation = nameTextController.text.isEmpty ? true : false;
-                              phoneValidation = phoneTextController.text.isEmpty ? true : false;
-                            });
-
-                            if ( nameValidation || phoneValidation ) return;
-
-                            newStudent.name = nameTextController.text;
-                            newStudent.phone = phoneTextController.text;
-
-                            if ( selectedDate == null ) {
-
-                              Notify(
-                                context: context,
-                                title: Text("Ошибка"),
-                                child: Text("Введите дату"),
-                                actions: [
-                                  MaterialButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: Text("Ок"),
-                                  )
-                                ]
-                              ).show();
-
-                              return;
-
-                            }
-
-                            Navigator.of(context).push(
-                                MaterialPageRoute(builder: (context) => TakePictureScreen())
-                            );
-                          },
-                        ),
-                      )
-                    ],
-                  );
-                },
-              );
-            }
+            builder: (context) => AlertDialog(
+                actions: [ Center(
+                  child: Container(
+                    width: 280,
+                    height: 280,
+                    child: QrImage(
+                      data: device.hash,
+                      size: 280,
+                      // embeddedImage: AssetImage("assets/logo.jpg"),
+                      // embeddedImageStyle: QrEmbeddedImageStyle(
+                      //   size: Size(100, 100)
+                      // ),
+                    ),
+                  ),
+                )
+              ]
+            ),
           );
         },
         child: Icon(Icons.add),

@@ -110,7 +110,7 @@ class _LessonPageState extends State<LessonPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          currentGroup.name
+          ""
         ),
       ),
       body: ListView.builder(

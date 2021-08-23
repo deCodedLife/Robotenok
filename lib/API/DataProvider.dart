@@ -51,3 +51,44 @@ class RespDynamic
     body: json["response"],
   );
 }
+
+class SingleResp {
+  int status;
+  dynamic body;
+
+  SingleResp({
+    this.status,
+    this.body
+  });
+
+  Map<String, dynamic> toJson() => {
+    "status": status,
+    "response": body
+  };
+
+  factory SingleResp.fromJson( Map<String, dynamic> json ) => new SingleResp(
+    status: json["status"],
+    body: json["response"],
+  );
+}
+
+class Device
+{
+  int id;
+  String hash;
+  int active;
+
+  Device({this.id, this.hash, this.active});
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "hash": hash,
+    "active": active
+  };
+
+  factory Device.fromJson( Map<String, dynamic> json ) => new Device(
+    id: json["id"],
+    hash: json["hash"],
+    active: json["active"]
+  );
+}

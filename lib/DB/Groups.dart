@@ -55,17 +55,20 @@ class GroupStudent
 class GroupType {
   int id;
   String name;
+  int active;
 
-  GroupType({this.id, this.name});
+  GroupType({this.id, this.name, this.active});
 
   factory GroupType.fromJson(Map<String, dynamic> json) => GroupType(
     id: json["id"],
-    name: json["name"]
+    name: json["name"],
+    active: json["active"]
   );
 
   Map<String, dynamic> toJson() => {
     "id": id,
-    "name": name
+    "name": name,
+    "active": active
   };
 
   Map<String, dynamic> export() => {
@@ -121,7 +124,6 @@ class GroupCurator
 class Group
 {
   int id;
-  String name;
   String time;
   int duration;
   int active;
@@ -130,7 +132,6 @@ class Group
 
   Group({
     this.id,
-    this.name,
     this.time,
     this.duration,
     this.active,
@@ -140,7 +141,6 @@ class Group
 
   factory Group.fromJson(Map<String, dynamic> json) => new Group(
     id: json["id"],
-    name: json["name"],
     time: json["time"],
     duration: json["duration"],
     active: json["active"],
@@ -150,7 +150,6 @@ class Group
 
   Map<String, dynamic> toJson() => {
     "id": id,
-    "name": name,
     "time": time,
     "duration": duration,
     "active": active,
@@ -159,7 +158,6 @@ class Group
   };
 
   Map<String, dynamic> export() => {
-    "name": name,
     "time": time,
     "duration": duration,
     "weekday": weekday,

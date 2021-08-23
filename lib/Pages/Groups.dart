@@ -3,13 +3,13 @@ import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:robotenok/API/DataProvider.dart';
+import 'package:robotenok/Pages/Notification.dart';
 
 import '../DB/Groups.dart';
 import '../API/Server.dart';
 import '../globals.dart' as globals;
 
 import 'Group.dart';
-
 
 class GroupsPage extends StatefulWidget {
   @override
@@ -19,6 +19,7 @@ class GroupsPage extends StatefulWidget {
 class _GroupsPageState extends State<GroupsPage> {
   List<int> selectedTiles = [];
   List<int> selectedWeekdays = [];
+  List<GroupType> _groupTypes = [];
 
   List<Group> groups = [];
   List<GroupType> groupTypes = [];
@@ -38,7 +39,7 @@ class _GroupsPageState extends State<GroupsPage> {
   }
 
   void exec() async {
-    if ( globals.groups.isNotEmpty ) return;
+    if (globals.groups.isNotEmpty) return;
 
     GroupCurator curator = new GroupCurator();
     List<GroupCurator> selectedGroups = [];
@@ -91,12 +92,27 @@ class _GroupsPageState extends State<GroupsPage> {
           GroupType element = GroupType.fromJson(item);
 
           for (GroupType type in groupTypes) {
-            if ( element.id == type.id ) element = null;
+            if (element.id == type.id) element = null;
           }
 
           if (element != null) groupTypes.add(element);
         }
       }
+    }
+
+    pack.body = new GroupType(active: 1).toJson();
+    data = await Server().getData("group-types", pack.toJson());
+
+    if (data.statusCode != 200) {
+      data.body != null
+          ? Notifications(context: context).customError(data.body)
+          : Notifications(context: context).serverError();
+    }
+
+    response = RespDynamic.fromJson(jsonDecode(data.body));
+
+    for (Map<String, dynamic> item in response.body) {
+      _groupTypes.add(GroupType.fromJson(item));
     }
 
     globals.groups = groups;
@@ -155,8 +171,10 @@ class _GroupsPageState extends State<GroupsPage> {
     return Card(
       child: GestureDetector(
         onTap: () {
-          Navigator.of(context)
-              .push(MaterialPageRoute(builder: (context) => GroupPage(currentGroup: currentGroup,)));
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => GroupPage(
+                    currentGroup: currentGroup,
+                  )));
         },
         child: Stack(
           fit: StackFit.loose,
@@ -208,7 +226,6 @@ class _GroupsPageState extends State<GroupsPage> {
   }
 
   Widget WeekDays(bool _isSelected, int index, BuildContext context) {
-    
     String day;
 
     if (index == 0) day = "Пн";
@@ -218,7 +235,7 @@ class _GroupsPageState extends State<GroupsPage> {
     if (index == 4) day = "Пт";
     if (index == 5) day = "Сб";
     if (index == 6) day = "Вс";
-    
+
     return Padding(
       padding: EdgeInsets.all(5),
       child: GestureDetector(
@@ -300,7 +317,58 @@ class _GroupsPageState extends State<GroupsPage> {
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
-        onPressed: () {},
+        onPressed: () {
+          showDialog(
+              context: context,
+              builder: (context) {
+                var newGroup = Group();
+                var selectedGroupType = _groupTypes.first;
+
+                return StatefulBuilder(
+                  builder: (context, setState) {
+                    return AlertDialog(
+                      title: Text("Новая группа"),
+                      actions: [
+                        Padding(
+                          padding: EdgeInsets.all(15),
+                          child: Expanded(
+                            child: Container(
+                              child: DropdownButton<GroupType>(
+                                iconSize: 30,
+                                icon: Expanded(
+                                  child: Align(
+                                    alignment: Alignment.topRight,
+                                    child: Icon(Icons.arrow_drop_down),
+                                  ),
+                                ),
+                                underline: Container(
+                                  height: 2,
+                                  color: Theme.of(context).accentColor,
+                                ),
+                                value: selectedGroupType,
+                                onChanged: (item) {
+                                  setState(() {
+                                    selectedGroupType = item;
+                                  });
+                                },
+                                items: _groupTypes
+                                    .map<DropdownMenuItem<GroupType>>(
+                                        (GroupType value) {
+                                  return DropdownMenuItem<GroupType>(
+                                    value: value,
+                                    child: Text(value.name),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          ),
+                        )
+                      ],
+                    );
+                  },
+                );
+              });
+        },
       ),
     );
   }
@@ -310,11 +378,7 @@ class Name extends StatelessWidget {
   final int weekday;
   final String start;
 
-  const Name({
-    Key key,
-    this.weekday,
-    this.start
-  }) : super(key: key);
+  const Name({Key key, this.weekday, this.start}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -346,10 +410,7 @@ class Name extends StatelessWidget {
 class Payment extends StatelessWidget {
   final int payment;
 
-  const Payment({
-    Key key,
-    this.payment
-  }) : super(key: key);
+  const Payment({Key key, this.payment}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
