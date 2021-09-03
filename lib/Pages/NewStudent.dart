@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:robotenok/API/DataProvider.dart';
+import '../globals.dart' as globals;
 
 import '../API/Server.dart';
 import '../DB/Image.dart';
@@ -8,6 +12,9 @@ import 'Notification.dart';
 import 'Camera.dart';
 
 class AddStudentPage extends StatefulWidget {
+  String hash = "";
+  AddStudentPage({this.hash});
+
   @override
   _AddStudentPageState createState() => _AddStudentPageState();
 }
@@ -79,7 +86,7 @@ class _AddStudentPageState extends State<AddStudentPage> {
         ),
         actions: [
           IconButton(
-            onPressed: () {
+            onPressed: () async {
               setState(() {
                 nameValidation = nameTextController.text.isEmpty ? true : false;
                 phoneValidation = phoneTextController.text.isEmpty ? true : false;
@@ -108,6 +115,21 @@ class _AddStudentPageState extends State<AddStudentPage> {
 
                 return;
 
+              }
+
+              print("student/" + widget.hash);
+              var data = await Server().getData(("student/" + widget.hash), newStudent.toJson());
+
+              if ( data.statusCode != 200 ) {
+                Notifications(context: context).customError( data.body );
+                return;
+              }
+
+              var response = RespDynamic.fromJson(jsonDecode(data.body));
+
+              for ( Map<String, dynamic> item in response.body ) {
+                var _user = Student.fromJson( item );
+                print(_user);
               }
 
               Navigator.of(context).push(
@@ -171,7 +193,7 @@ class _AddStudentPageState extends State<AddStudentPage> {
                               keyboardType: TextInputType.phone,
                               decoration: InputDecoration(
                                   icon: Icon(Icons.phone),
-                                  hintText: "Номер",
+                                  labelText: "Номер",
                                   errorText: phoneValidation ? "Введите номер" : null
                               ),
                             ),

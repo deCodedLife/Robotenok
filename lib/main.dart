@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:camera/camera.dart';
+import 'package:robotenok/Pages/QrScan.dart';
 import 'globals.dart' as globals;
 
 import 'DB/Profile.dart';
 import 'API/Auth.dart';
 
+import 'Pages/SignInPage.dart';
 import 'Pages/ProfilePage.dart';
 import 'Pages/Groups.dart';
 import 'Pages/Notification.dart';
@@ -13,17 +15,26 @@ import 'Pages/Notification.dart';
 main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+
   final cameras = await availableCameras();
   globals.camera = cameras.first;
 
   await Profile().init();
   globals.profile = await Profile().get();
-  globals.authProvider.initData(
-      globals.profile.login,
-      globals.profile.password
-  );
 
-  await globals.authProvider.getToken();
+  globals.profile.login = "";
+
+  if ( globals.profile.login != "" ) {
+
+    globals.authProvider.initData(
+        globals.profile.login,
+        globals.profile.password
+    );
+
+    await globals.authProvider.getToken();
+
+  }
 
   runApp(MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -54,6 +65,11 @@ class _AppProviderState extends State<AppProvider> {
     super.initState();
     WidgetsBinding.instance
         .addPostFrameCallback((_) {
+      if ( globals.profile.login == "" ) {
+        Navigator.of(context).push(MaterialPageRoute(builder: (context) => QrView(choosedRole: 1)));
+        return;
+      }
+
       if ( globals.authProvider.token.isEmpty ) {
         Notify(
             context: context,

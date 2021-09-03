@@ -7,7 +7,8 @@ import 'DataProvider.dart';
 
 class Server
 {
-  final serverUri = "192.168.1.86";
+  // final serverUri = "192.168.1.86";
+  final serverUri = "192.168.1.13";
 
   Future<http.Response> getData(String uri, Map<String, dynamic> data) async {
     final headers = {HttpHeaders.contentTypeHeader: 'application/json'};
